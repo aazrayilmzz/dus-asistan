@@ -3,8 +3,18 @@ import { SPECIALTIES, DIFFICULTIES } from '../constants/specialties';
 
 const EMPTY_FORM = { question: '', answer: '', subject: SPECIALTIES[0], difficulty: 'orta' };
 
-function FlashcardForm({ onCreate, onCancel }) {
-    const [formData, setFormData] = useState(EMPTY_FORM);
+function FlashcardForm({ initialCard, onSubmit, onCancel }) {
+    const isEditing = !!initialCard;
+    const [formData, setFormData] = useState(
+        isEditing
+            ? {
+                question: initialCard.question,
+                answer: initialCard.answer,
+                subject: initialCard.subject,
+                difficulty: initialCard.difficulty,
+            }
+            : EMPTY_FORM
+    );
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
 
@@ -19,10 +29,10 @@ function FlashcardForm({ onCreate, onCancel }) {
         setSaving(true);
 
         try {
-            await onCreate(formData);
-            setFormData(EMPTY_FORM);
+            await onSubmit(formData);
+            if (!isEditing) setFormData(EMPTY_FORM);
         } catch (err) {
-            setError(err.message || 'Kart eklenemedi.');
+            setError(err.message || 'Kart kaydedilemedi.');
         } finally {
             setSaving(false);
         }
@@ -71,7 +81,7 @@ function FlashcardForm({ onCreate, onCancel }) {
                     Vazgeç
                 </button>
                 <button type="submit" className="auth-submit" disabled={saving}>
-                    {saving ? 'Ekleniyor...' : 'Kartı Ekle'}
+                    {saving ? 'Kaydediliyor...' : isEditing ? 'Değişiklikleri Kaydet' : 'Kartı Ekle'}
                 </button>
             </div>
         </form>

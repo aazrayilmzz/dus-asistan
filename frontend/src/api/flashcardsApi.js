@@ -10,6 +10,11 @@ export async function createFlashcard(data) {
     return response.data.data;
 }
 
+export async function updateFlashcard(id, data) {
+    const response = await axiosClient.put(`/flashcards/${id}`, data);
+    return response.data.data;
+}
+
 export async function deleteFlashcard(id) {
     await axiosClient.delete(`/flashcards/${id}`);
 }

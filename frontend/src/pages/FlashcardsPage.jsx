@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { listFlashcards, createFlashcard, deleteFlashcard } from '../api/flashcardsApi';
+import { listFlashcards, createFlashcard, updateFlashcard, deleteFlashcard } from '../api/flashcardsApi';
 import getErrorMessage from '../api/getErrorMessage';
 import FlashcardStudy from '../components/FlashcardStudy';
 import FlashcardForm from '../components/FlashcardForm';
@@ -12,6 +12,7 @@ function FlashcardsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
+    const [editingCard, setEditingCard] = useState(null);
     const [filters, setFilters] = useState({ subject: '', difficulty: '' });
 
     useEffect(() => {
@@ -35,11 +36,31 @@ function FlashcardsPage() {
         };
     }, [filters]);
 
-    async function handleCreate(formData) {
+    function openCreateForm() {
+        setEditingCard(null);
+        setShowForm(true);
+    }
+
+    function openEditForm(card) {
+        setEditingCard(card);
+        setShowForm(true);
+    }
+
+    function closeForm() {
+        setShowForm(false);
+        setEditingCard(null);
+    }
+
+    async function handleSubmit(formData) {
         try {
-            const created = await createFlashcard(formData);
-            setCards((prev) => [created, ...prev]);
-            setShowForm(false);
+            if (editingCard) {
+                const updated = await updateFlashcard(editingCard.id, formData);
+                setCards((prev) => prev.map((card) => (card.id === updated.id ? updated : card)));
+            } else {
+                const created = await createFlashcard(formData);
+                setCards((prev) => [created, ...prev]);
+            }
+            closeForm();
         } catch (err) {
             throw new Error(getErrorMessage(err));
         }
@@ -67,12 +88,12 @@ function FlashcardsPage() {
             <header className="flashcards-header">
                 <Link to="/" className="flashcards-back">← Ana Sayfa</Link>
                 <h1>Çalışma Kartları</h1>
-                <button className="auth-submit" onClick={() => setShowForm((s) => !s)}>
+                <button className="auth-submit" onClick={() => (showForm ? closeForm() : openCreateForm())}>
                     {showForm ? 'Kapat' : '+ Yeni Kart'}
                 </button>
             </header>
 
-            {showForm && <FlashcardForm onCreate={handleCreate} onCancel={() => setShowForm(false)} />}
+            {showForm && <FlashcardForm initialCard={editingCard} onSubmit={handleSubmit} onCancel={closeForm} />}
 
             <div className="flashcards-filters">
                 <select name="subject" value={filters.subject} onChange={handleFilterChange}>
@@ -102,7 +123,7 @@ function FlashcardsPage() {
             ) : (
                 <div className="flashcards-grid">
                     {cards.map((card) => (
-                        <FlashcardStudy key={card.id} card={card} onDelete={handleDelete} />
+                        <FlashcardStudy key={card.id} card={card} onDelete={handleDelete} onEdit={openEditForm} />
                     ))}
                 </div>
             )}

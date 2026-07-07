@@ -1,11 +1,16 @@
 import { useState } from 'react';
 
-function FlashcardStudy({ card, onDelete }) {
+function FlashcardStudy({ card, onDelete, onEdit }) {
     const [flipped, setFlipped] = useState(false);
 
     function handleDelete(event) {
         event.stopPropagation();
         onDelete(card.id);
+    }
+
+    function handleEdit(event) {
+        event.stopPropagation();
+        onEdit(card);
     }
 
     return (
@@ -20,9 +25,14 @@ function FlashcardStudy({ card, onDelete }) {
                     <p className="card-text">{card.answer}</p>
                 </div>
             </div>
-            <button className="card-delete" onClick={handleDelete} title="Kartı sil">
-                ×
-            </button>
+            <div className="card-actions">
+                <button className="card-action-btn" onClick={handleEdit} title="Kartı düzenle">
+                    ✎
+                </button>
+                <button className="card-action-btn card-delete" onClick={handleDelete} title="Kartı sil">
+                    ×
+                </button>
+            </div>
         </div>
     );
 }

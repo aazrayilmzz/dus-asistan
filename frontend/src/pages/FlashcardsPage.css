@@ -139,11 +139,16 @@
   color: #dc2626;
 }
 
-.card-delete {
+.card-actions {
   position: absolute;
   top: 8px;
   right: 8px;
   z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+
+.card-action-btn {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -152,7 +157,15 @@
   color: var(--text-h);
   cursor: pointer;
   line-height: 1;
-  font-size: 16px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-action-btn:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
 }
 
 .card-delete:hover {
