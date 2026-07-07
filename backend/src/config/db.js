@@ -1,4 +1,9 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+
+// DATE sütunlarını Date nesnesine çevirmeden ham 'YYYY-MM-DD' string olarak döndür.
+// Aksi halde pg, yerel saat dilimine göre Date objesi üretiyor ve JSON'a
+// çevrilirken UTC'ye kayarak günü bir öncekine kaydırabiliyor.
+types.setTypeParser(types.builtins.DATE, (value) => value);
 
 const pool = new Pool({
     host: process.env.DB_HOST,
