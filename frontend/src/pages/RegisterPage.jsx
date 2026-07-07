@@ -3,17 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../api/authApi';
 import getErrorMessage from '../api/getErrorMessage';
 import heroImg from '../assets/hero.png';
-
-const SPECIALTIES = [
-    'Ağız, Diş ve Çene Cerrahisi',
-    'Ağız, Diş ve Çene Radyolojisi',
-    'Endodonti',
-    'Ortodonti',
-    'Pedodonti',
-    'Periodontoloji',
-    'Protetik Diş Tedavisi',
-    'Restoratif Diş Tedavisi',
-];
+import { SPECIALTIES } from '../constants/specialties';
 
 function RegisterPage() {
     const navigate = useNavigate();

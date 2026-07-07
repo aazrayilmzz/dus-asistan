@@ -1,0 +1,208 @@
+.flashcards-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.flashcards-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.flashcards-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.flashcards-back {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.flashcards-back:hover {
+  text-decoration: underline;
+}
+
+.flashcards-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.flashcards-filters select {
+  font: inherit;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-h);
+}
+
+.flashcards-status {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.flashcards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.flip-card {
+  position: relative;
+  height: 200px;
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+
+.flip-card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flip-card-front {
+  justify-content: space-between;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: var(--accent-bg);
+}
+
+.card-text {
+  margin: 0;
+  color: var(--text-h);
+  font-size: 15px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+}
+
+.card-subject {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.card-difficulty {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+
+.diff-kolay {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.diff-orta {
+  background: rgba(234, 179, 8, 0.15);
+  color: #ca8a04;
+}
+
+.diff-zor {
+  background: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+}
+
+.card-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-h);
+  cursor: pointer;
+  line-height: 1;
+  font-size: 16px;
+}
+
+.card-delete:hover {
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.flashcard-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.flashcard-form textarea {
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  resize: vertical;
+  min-height: 70px;
+}
+
+.flashcard-form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.flashcard-form-row .field {
+  flex: 1;
+}
+
+.flashcard-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.flashcard-cancel {
+  font: inherit;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+  cursor: pointer;
+}

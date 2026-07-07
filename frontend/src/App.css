@@ -125,6 +125,17 @@
   text-align: center;
 }
 
+.home-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 8px;
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}
+
 .home-logout {
   font: inherit;
   padding: 8px 16px;
