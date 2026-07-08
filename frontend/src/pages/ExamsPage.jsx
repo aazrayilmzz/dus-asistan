@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { listExams, createExam, updateExam, deleteExam } from '../api/examsApi';
 import getErrorMessage from '../api/getErrorMessage';
 import ExamForm from '../components/ExamForm';
+import ExamProgressChart from '../components/ExamProgressChart';
 import './ExamsPage.css';
 
 function ExamsPage() {
@@ -96,6 +97,8 @@ function ExamsPage() {
             ) : exams.length === 0 ? (
                 <p className="exams-status">Henüz deneme kaydı yok. Yukarıdan ilk denemeni ekle!</p>
             ) : (
+                <>
+                {exams.length > 1 && <ExamProgressChart exams={exams} />}
                 <div className="exams-table-wrapper">
                     <table className="exams-table">
                         <thead>
@@ -134,6 +137,7 @@ function ExamsPage() {
                         </tbody>
                     </table>
                 </div>
+                </>
             )}
         </div>
     );
