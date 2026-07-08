@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import FlashcardsPage from './pages/FlashcardsPage';
+import ExamsPage from './pages/ExamsPage';
 import './App.css';
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
         <Routes>
             <Route path="/" element={<RequireAuth><HomePage /></RequireAuth>} />
             <Route path="/flashcards" element={<RequireAuth><FlashcardsPage /></RequireAuth>} />
+            <Route path="/exams" element={<RequireAuth><ExamsPage /></RequireAuth>} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />

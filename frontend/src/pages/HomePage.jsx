@@ -15,6 +15,7 @@ function HomePage() {
             <h1>Hoş geldin, {user.fullName}</h1>
             <p>{user.targetSpecialty ? `Hedef branş: ${user.targetSpecialty}` : 'Henüz bir hedef branş seçmedin.'}</p>
             <Link to="/flashcards" className="home-link">Çalışma Kartları</Link>
+            <Link to="/exams" className="home-link">Denemeler</Link>
             <button className="home-logout" onClick={handleLogout}>
                 Çıkış Yap
             </button>

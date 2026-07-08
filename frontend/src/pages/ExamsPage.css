@@ -1,0 +1,149 @@
+.exams-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.exams-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.exams-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.exams-back {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.exams-back:hover {
+  text-decoration: underline;
+}
+
+.exams-status {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.exams-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+}
+
+.exams-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.exams-table th,
+.exams-table td {
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.exams-table thead th {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.exams-table tbody tr {
+  border-bottom: 1px solid var(--border);
+}
+
+.exams-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.exams-table tbody td {
+  color: var(--text-h);
+}
+
+.exam-net {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.exam-row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.card-action-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-h);
+  cursor: pointer;
+  line-height: 1;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-action-btn:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.card-delete:hover {
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.exam-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.exam-form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.exam-form-row .field {
+  flex: 1;
+  min-width: 100px;
+}
+
+.exam-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.exam-cancel {
+  font: inherit;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-h);
+  cursor: pointer;
+}
