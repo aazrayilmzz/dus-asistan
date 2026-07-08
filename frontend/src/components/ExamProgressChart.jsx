@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 
 function formatDate(isoDate) {
-    const [year, month, day] = isoDate.split('-');
+    const [, month, day] = isoDate.split('-');
     return `${day}.${month}`;
 }
 
