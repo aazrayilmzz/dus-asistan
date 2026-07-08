@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import FlashcardsPage from './pages/FlashcardsPage';
 import ExamsPage from './pages/ExamsPage';
+import PomodoroPage from './pages/PomodoroPage';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
             <Route path="/" element={<RequireAuth><HomePage /></RequireAuth>} />
             <Route path="/flashcards" element={<RequireAuth><FlashcardsPage /></RequireAuth>} />
             <Route path="/exams" element={<RequireAuth><ExamsPage /></RequireAuth>} />
+            <Route path="/pomodoro" element={<RequireAuth><PomodoroPage /></RequireAuth>} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
