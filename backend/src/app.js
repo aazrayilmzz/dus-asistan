@@ -12,6 +12,7 @@ require('./config/db');
 const authRoutes = require('./modules/auth/auth.routes');
 const flashcardsRoutes = require('./modules/flashcards/flashcards.routes');
 const examsRoutes = require('./modules/exams/exams.routes');
+const pomodoroRoutes = require('./modules/pomodoro/pomodoro.routes');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/flashcards', flashcardsRoutes);
 app.use('/api/exams', examsRoutes);
+app.use('/api/pomodoro', pomodoroRoutes);
 
 // Sunucuyu Başlat
 const PORT = process.env.PORT || 5000;
