@@ -1,7 +1,15 @@
 import { useState } from 'react';
+import { SPECIALTIES } from '../constants/specialties';
 
 function todayIso() {
     return new Date().toISOString().slice(0, 10);
+}
+
+function emptySubjectRows() {
+    return SPECIALTIES.reduce((acc, subject) => {
+        acc[subject] = { correct: '', wrong: '' };
+        return acc;
+    }, {});
 }
 
 function toFormState(exam) {
@@ -21,16 +29,33 @@ function ExamForm({ initialExam, onSubmit, onCancel }) {
     const [formData, setFormData] = useState(isEditing ? toFormState(initialExam) : EMPTY_FORM);
     const [error, setError] = useState('');
     const [saving, setSaving] = useState(false);
+    const [showSubjects, setShowSubjects] = useState(false);
+    const [subjectRows, setSubjectRows] = useState(emptySubjectRows);
 
     function handleChange(event) {
         const { name, value } = event.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
+    function handleSubjectRowChange(subject, field, value) {
+        setSubjectRows((prev) => ({
+            ...prev,
+            [subject]: { ...prev[subject], [field]: value },
+        }));
+    }
+
     async function handleSubmit(event) {
         event.preventDefault();
         setError('');
         setSaving(true);
+
+        const subjectResults = Object.entries(subjectRows)
+            .filter(([, { correct, wrong }]) => correct !== '' || wrong !== '')
+            .map(([subject, { correct, wrong }]) => ({
+                subject,
+                correctCount: Number(correct) || 0,
+                wrongCount: Number(wrong) || 0,
+            }));
 
         try {
             await onSubmit({
@@ -39,8 +64,13 @@ function ExamForm({ initialExam, onSubmit, onCancel }) {
                 correctCount: Number(formData.correctCount),
                 wrongCount: Number(formData.wrongCount),
                 blankCount: Number(formData.blankCount),
+                subjectResults,
             });
-            if (!isEditing) setFormData(EMPTY_FORM);
+            if (!isEditing) {
+                setFormData(EMPTY_FORM);
+                setSubjectRows(emptySubjectRows());
+                setShowSubjects(false);
+            }
         } catch (err) {
             setError(err.message || 'Sınav kaydedilemedi.');
         } finally {
@@ -116,6 +146,46 @@ function ExamForm({ initialExam, onSubmit, onCancel }) {
                     />
                 </div>
             </div>
+
+            {!isEditing && (
+                <div className="exam-subjects">
+                    <button
+                        type="button"
+                        className="exam-subjects-toggle"
+                        onClick={() => setShowSubjects((prev) => !prev)}
+                    >
+                        {showSubjects ? '− Branş bazında sonuçları gizle' : '+ Branş bazında sonuç ekle (opsiyonel)'}
+                    </button>
+
+                    {showSubjects && (
+                        <div className="exam-subjects-grid">
+                            {SPECIALTIES.map((subject) => (
+                                <div key={subject} className="exam-subject-row">
+                                    <span className="exam-subject-name">{subject}</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="Doğru"
+                                        value={subjectRows[subject].correct}
+                                        onChange={(event) =>
+                                            handleSubjectRowChange(subject, 'correct', event.target.value)
+                                        }
+                                    />
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="Yanlış"
+                                        value={subjectRows[subject].wrong}
+                                        onChange={(event) =>
+                                            handleSubjectRowChange(subject, 'wrong', event.target.value)
+                                        }
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="exam-form-actions">
                 <button type="button" className="exam-cancel" onClick={onCancel}>

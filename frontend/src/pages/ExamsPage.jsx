@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { listExams, createExam, updateExam, deleteExam } from '../api/examsApi';
+import { listExams, createExam, updateExam, deleteExam, createSubjectResult } from '../api/examsApi';
 import getErrorMessage from '../api/getErrorMessage';
 import ExamForm from '../components/ExamForm';
-import ExamProgressChart from '../components/ExamProgressChart';
 import './ExamsPage.css';
 
 function ExamsPage() {
@@ -49,7 +48,7 @@ function ExamsPage() {
         setEditingExam(null);
     }
 
-    async function handleSubmit(formData) {
+    async function handleSubmit({ subjectResults, ...formData }) {
         try {
             if (editingExam) {
                 const updated = await updateExam(editingExam.id, formData);
@@ -59,6 +58,18 @@ function ExamsPage() {
                 setExams((prev) =>
                     [created, ...prev].sort((a, b) => (a.exam_date < b.exam_date ? 1 : -1))
                 );
+
+                if (subjectResults?.length) {
+                    try {
+                        await Promise.all(
+                            subjectResults.map((result) => createSubjectResult(created.id, result))
+                        );
+                    } catch (subjectErr) {
+                        setError(
+                            `Deneme eklendi ama branş sonuçları kaydedilirken bir sorun oluştu: ${getErrorMessage(subjectErr)}`
+                        );
+                    }
+                }
             }
             closeForm();
         } catch (err) {
@@ -88,6 +99,8 @@ function ExamsPage() {
                 </button>
             </header>
 
+            <Link to="/dashboard" className="exams-dashboard-link">İlerleme Grafiklerini Gör →</Link>
+
             {showForm && <ExamForm initialExam={editingExam} onSubmit={handleSubmit} onCancel={closeForm} />}
 
             {error && <div className="auth-error">{error}</div>}
@@ -98,7 +111,6 @@ function ExamsPage() {
                 <p className="exams-status">Henüz deneme kaydı yok. Yukarıdan ilk denemeni ekle!</p>
             ) : (
                 <>
-                {exams.length > 1 && <ExamProgressChart exams={exams} />}
                 <div className="exams-table-wrapper">
                     <table className="exams-table">
                         <thead>

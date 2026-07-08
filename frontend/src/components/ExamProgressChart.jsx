@@ -47,7 +47,7 @@ function ExamProgressChart({ exams }) {
                         type="monotone"
                         dataKey="correct"
                         name="Doğru"
-                        stroke="#22c55e"
+                        stroke="#0ca30c"
                         strokeWidth={2}
                         dot={{ r: 3 }}
                     />
@@ -55,7 +55,7 @@ function ExamProgressChart({ exams }) {
                         type="monotone"
                         dataKey="wrong"
                         name="Yanlış"
-                        stroke="var(--error)"
+                        stroke="#d03b3b"
                         strokeWidth={2}
                         dot={{ r: 3 }}
                     />

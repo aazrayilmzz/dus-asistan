@@ -19,6 +19,7 @@ function HomePage() {
             <Link to="/flashcards" className="home-link">Çalışma Kartları</Link>
             <Link to="/exams" className="home-link">Denemeler</Link>
             <Link to="/pomodoro" className="home-link">Pomodoro</Link>
+            <Link to="/dashboard" className="home-link">İlerleme Grafikleri</Link>
             <button className="home-logout" onClick={handleLogout}>
                 Çıkış Yap
             </button>

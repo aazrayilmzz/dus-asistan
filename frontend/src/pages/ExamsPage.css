@@ -28,6 +28,19 @@
   text-decoration: underline;
 }
 
+.exams-dashboard-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.exams-dashboard-link:hover {
+  text-decoration: underline;
+}
+
 .exams-status {
   text-align: center;
   padding: 40px 0;
@@ -160,4 +173,73 @@
   background: transparent;
   color: var(--text-h);
   cursor: pointer;
+}
+
+.exam-subjects {
+  margin-top: -4px;
+}
+
+.exam-subjects-toggle {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.exam-subjects-toggle:hover {
+  text-decoration: underline;
+}
+
+.exam-subjects-grid {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.exam-subject-row {
+  display: grid;
+  grid-template-columns: 1fr 84px 84px;
+  gap: 10px;
+  align-items: center;
+}
+
+.exam-subject-name {
+  font-size: 13px;
+  color: var(--text-h);
+}
+
+.exam-subject-row input {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  color: var(--text-h);
+  width: 100%;
+}
+
+.exam-subject-row input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+@media (max-width: 480px) {
+  .exam-subject-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .exam-subject-row input {
+    width: auto;
+  }
 }
