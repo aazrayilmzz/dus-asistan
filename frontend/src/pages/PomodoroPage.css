@@ -61,7 +61,7 @@
   font-size: 64px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
+  color: var(--accent-warm);
   letter-spacing: 2px;
 }
 
@@ -103,9 +103,9 @@
 }
 
 .pomodoro-duration-btn.active {
-  background: var(--accent-bg);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent-warm-bg);
+  border-color: var(--accent-warm);
+  color: var(--accent-warm);
   font-weight: 600;
 }
 

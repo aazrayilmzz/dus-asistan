@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import logoIcon from '../assets/logo-icon.png';
 
 function HomePage() {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ function HomePage() {
 
     return (
         <div className="home-page">
+            <img src={logoIcon} className="home-logo" alt="DUS Asistan" />
             <h1>Hoş geldin, {user.fullName}</h1>
             <p>{user.targetSpecialty ? `Hedef branş: ${user.targetSpecialty}` : 'Henüz bir hedef branş seçmedin.'}</p>
             <Link to="/flashcards" className="home-link">Çalışma Kartları</Link>
