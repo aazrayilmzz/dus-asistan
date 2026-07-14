@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { SPECIALTIES } from '../constants/specialties';
+import { EXAM_SUBJECTS } from '../constants/specialties';
 
 function todayIso() {
     return new Date().toISOString().slice(0, 10);
 }
 
 function emptySubjectRows() {
-    return SPECIALTIES.reduce((acc, subject) => {
+    return EXAM_SUBJECTS.reduce((acc, subject) => {
         acc[subject] = { correct: '', wrong: '' };
         return acc;
     }, {});
@@ -159,7 +159,7 @@ function ExamForm({ initialExam, onSubmit, onCancel }) {
 
                     {showSubjects && (
                         <div className="exam-subjects-grid">
-                            {SPECIALTIES.map((subject) => (
+                            {EXAM_SUBJECTS.map((subject) => (
                                 <div key={subject} className="exam-subject-row">
                                     <span className="exam-subject-name">{subject}</span>
                                     <input

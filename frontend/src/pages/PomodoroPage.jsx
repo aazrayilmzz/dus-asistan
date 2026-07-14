@@ -6,9 +6,10 @@ import {
     abandonSession,
     getActiveSession,
     getHistory,
+    getWeeklySummary,
 } from '../api/pomodoroApi';
 import getErrorMessage from '../api/getErrorMessage';
-import { SPECIALTIES } from '../constants/specialties';
+import { EXAM_SUBJECTS } from '../constants/specialties';
 import './PomodoroPage.css';
 
 const DURATION_OPTIONS = [25, 45, 50];
@@ -25,6 +26,16 @@ function formatTime(totalSeconds) {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+function formatSessionLabel(session) {
+    if (session.subject && session.detail) return `${session.subject} — ${session.detail}`;
+    return session.subject || session.detail || '-';
+}
+
+function formatHours(totalMinutes) {
+    if (totalMinutes < 60) return `${totalMinutes} dk`;
+    return `${(totalMinutes / 60).toFixed(1)} saat`;
+}
+
 function PomodoroPage() {
     const [activeSession, setActiveSession] = useState(null);
     const [remaining, setRemaining] = useState(0);
@@ -35,6 +46,7 @@ function PomodoroPage() {
     const [detail, setDetail] = useState('');
     const [duration, setDuration] = useState(25);
     const [starting, setStarting] = useState(false);
+    const [weeklySummary, setWeeklySummary] = useState([]);
     const completingRef = useRef(false);
 
     useEffect(() => {
@@ -52,6 +64,14 @@ function PomodoroPage() {
             })
             .finally(() => {
                 if (!cancelled) setLoading(false);
+            });
+
+        getWeeklySummary()
+            .then((result) => {
+                if (!cancelled) setWeeklySummary(result);
+            })
+            .catch(() => {
+                if (!cancelled) setWeeklySummary([]);
             });
 
         return () => {
@@ -72,6 +92,7 @@ function PomodoroPage() {
                     .then((completed) => {
                         setHistory((prev) => [completed, ...prev]);
                         setActiveSession(null);
+                        getWeeklySummary().then(setWeeklySummary).catch(() => {});
                     })
                     .catch((err) => setError(getErrorMessage(err)))
                     .finally(() => {
@@ -88,10 +109,12 @@ function PomodoroPage() {
         setError('');
         setStarting(true);
 
-        const subject = [specialty, detail.trim()].filter(Boolean).join(' - ') || undefined;
-
         try {
-            const session = await startSession({ subject, durationMinutes: duration });
+            const session = await startSession({
+                subject: specialty || undefined,
+                detail: detail.trim() || undefined,
+                durationMinutes: duration,
+            });
             setActiveSession(session);
             setRemaining(remainingSecondsFor(session));
         } catch (err) {
@@ -112,6 +135,7 @@ function PomodoroPage() {
             const completed = await completeSession(activeSession.id);
             setHistory((prev) => [completed, ...prev]);
             setActiveSession(null);
+            getWeeklySummary().then(setWeeklySummary).catch(() => {});
         } catch (err) {
             setError(getErrorMessage(err));
         }
@@ -147,7 +171,7 @@ function PomodoroPage() {
             ) : activeSession ? (
                 <div className="pomodoro-timer-card">
                     <p className="pomodoro-timer-subject">
-                        {activeSession.subject || 'Odaklanma zamanı'}
+                        {formatSessionLabel(activeSession) !== '-' ? formatSessionLabel(activeSession) : 'Odaklanma zamanı'}
                     </p>
                     <div className="pomodoro-timer-display">{formatTime(remaining)}</div>
                     <div className="pomodoro-timer-actions">
@@ -165,7 +189,7 @@ function PomodoroPage() {
                         <label htmlFor="specialty">Branş</label>
                         <select id="specialty" value={specialty} onChange={(e) => setSpecialty(e.target.value)}>
                             <option value="">Seçiniz (opsiyonel)</option>
-                            {SPECIALTIES.map((item) => (
+                            {EXAM_SUBJECTS.map((item) => (
                                 <option key={item} value={item}>
                                     {item}
                                 </option>
@@ -211,6 +235,20 @@ function PomodoroPage() {
                 <span>Toplam odaklanma: <strong>{completedMinutes} dk</strong></span>
             </div>
 
+            {weeklySummary.length > 0 && (
+                <div className="pomodoro-weekly-summary">
+                    <h2>Bu Hafta Branş Dağılımı</h2>
+                    <ul>
+                        {weeklySummary.map((row) => (
+                            <li key={row.subject}>
+                                <span>{row.subject}</span>
+                                <strong>{formatHours(row.totalMinutes)}</strong>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
             {pastSessions.length > 0 && (
                 <div className="pomodoro-history-wrapper">
                     <table className="pomodoro-history-table">
@@ -225,7 +263,7 @@ function PomodoroPage() {
                         <tbody>
                             {pastSessions.map((session) => (
                                 <tr key={session.id}>
-                                    <td>{session.subject || '-'}</td>
+                                    <td>{formatSessionLabel(session)}</td>
                                     <td>{session.duration_minutes} dk</td>
                                     <td>
                                         <span className={`pomodoro-badge pomodoro-badge-${session.status}`}>

@@ -11,13 +11,14 @@ function validatePositive(label, value) {
     }
 }
 
-async function startSession(userId, { subject, durationMinutes } = {}) {
+async function startSession(userId, { subject, detail, durationMinutes } = {}) {
     validatePositive('durationMinutes', durationMinutes);
 
     try {
         return await pomodoroRepository.startSession({
             userId,
             subject,
+            detail,
             durationMinutes: durationMinutes ?? DEFAULT_DURATION_MINUTES,
         });
     } catch (error) {
@@ -92,6 +93,25 @@ async function getStreak(userId) {
     return { streak: computeStreak(days) };
 }
 
+function getMondayOfCurrentWeek() {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? 6 : day - 1;
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+}
+
+async function getWeeklySummary(userId) {
+    const weekStart = getMondayOfCurrentWeek();
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const rows = await pomodoroRepository.getWeeklySummary(userId, weekStart, weekEnd);
+    return rows.map((row) => ({
+        subject: row.subject || 'Genel',
+        totalMinutes: row.total_minutes,
+    }));
+}
+
 module.exports = {
     startSession,
     completeSession,
@@ -99,4 +119,5 @@ module.exports = {
     getActiveSession,
     getHistory,
     getStreak,
+    getWeeklySummary,
 };

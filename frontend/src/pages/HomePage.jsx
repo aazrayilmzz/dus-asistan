@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import logoIcon from '../assets/logo-icon.png';
 import { updateProfile } from '../api/authApi';
 import { getStreak } from '../api/pomodoroApi';
+import { getWeakSubjects } from '../api/examsApi';
 import { getTipOfTheDay } from '../constants/dailyTips';
 
 function FlashcardIcon() {
@@ -40,6 +41,14 @@ function ChartIcon() {
     );
 }
 
+function StarIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2.5l2.86 6.28 6.9.68-5.2 4.62 1.55 6.78L12 17.6l-6.11 3.26 1.55-6.78-5.2-4.62 6.9-.68L12 2.5z" />
+        </svg>
+    );
+}
+
 function LogoutIcon() {
     return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -53,6 +62,14 @@ function FlameIcon() {
     return (
         <svg viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.545 3.75 3.75 0 0 1 3.255 3.717Z" />
+        </svg>
+    );
+}
+
+function TrendDownIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 7l7 7 4-4 5 5M15 15h5v-5" />
         </svg>
     );
 }
@@ -93,6 +110,7 @@ const MENU_ITEMS = [
     { to: '/exams', label: 'Denemeler', Icon: ExamIcon },
     { to: '/pomodoro', label: 'Pomodoro', Icon: ClockIcon },
     { to: '/dashboard', label: 'İlerleme Grafikleri', Icon: ChartIcon },
+    { to: '/flashcards?needsReview=true', label: 'Hata Kutusu', Icon: StarIcon },
 ];
 
 function ExamCountdown({ targetExamDate, createdAt, onSave }) {
@@ -166,15 +184,37 @@ function StreakBadge({ streak }) {
     );
 }
 
+function WeakSubjectNudge({ weakSubject }) {
+    if (!weakSubject) return null;
+
+    return (
+        <div className="weak-subject-nudge">
+            <TrendDownIcon />
+            <p>
+                Son 3 denemedir <strong>{weakSubject.subject}</strong> netlerin düşüşte. Bu hafta o branşın çalışma
+                kartlarına göz atmak ister misin?
+            </p>
+            <Link to={`/flashcards?subject=${encodeURIComponent(weakSubject.subject)}`} className="weak-subject-cta">
+                Çalışma Kartlarına Git
+            </Link>
+        </div>
+    );
+}
+
 function HomePage() {
     const navigate = useNavigate();
     const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('dusasistan_user')));
     const [streak, setStreak] = useState(null);
+    const [weakSubjects, setWeakSubjects] = useState([]);
 
     useEffect(() => {
         getStreak()
             .then((result) => setStreak(result.streak))
             .catch(() => setStreak(null));
+
+        getWeakSubjects()
+            .then(setWeakSubjects)
+            .catch(() => setWeakSubjects([]));
     }, []);
 
     function handleLogout() {
@@ -208,6 +248,8 @@ function HomePage() {
             <div className="home-stats-row">
                 <ExamCountdown targetExamDate={user.targetExamDate} createdAt={user.createdAt} onSave={handleSaveExamDate} />
             </div>
+
+            <WeakSubjectNudge weakSubject={weakSubjects[0]} />
 
             <p className="daily-tip">{getTipOfTheDay()}</p>
 

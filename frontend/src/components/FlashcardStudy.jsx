@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function FlashcardStudy({ card, onDelete, onEdit }) {
+function FlashcardStudy({ card, onDelete, onEdit, onToggleReview }) {
     const [flipped, setFlipped] = useState(false);
 
     function handleDelete(event) {
@@ -13,8 +13,13 @@ function FlashcardStudy({ card, onDelete, onEdit }) {
         onEdit(card);
     }
 
+    function handleToggleReview(event) {
+        event.stopPropagation();
+        onToggleReview(card);
+    }
+
     return (
-        <div className="flip-card" onClick={() => setFlipped((f) => !f)}>
+        <div className={`flip-card ${card.needs_review ? 'flip-card-flagged' : ''}`} onClick={() => setFlipped((f) => !f)}>
             <div className={`flip-card-inner ${flipped ? 'flipped' : ''}`}>
                 <div className="flip-card-face flip-card-front">
                     <span className={`card-difficulty diff-${card.difficulty}`}>{card.difficulty}</span>
@@ -26,6 +31,13 @@ function FlashcardStudy({ card, onDelete, onEdit }) {
                 </div>
             </div>
             <div className="card-actions">
+                <button
+                    className={`card-action-btn card-flag ${card.needs_review ? 'active' : ''}`}
+                    onClick={handleToggleReview}
+                    title={card.needs_review ? 'Hata kutusundan çıkar' : 'Hata kutusuna ekle'}
+                >
+                    {card.needs_review ? '★' : '☆'}
+                </button>
                 <button className="card-action-btn" onClick={handleEdit} title="Kartı düzenle">
                     ✎
                 </button>

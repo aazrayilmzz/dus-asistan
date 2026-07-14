@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../api/authApi';
 import getErrorMessage from '../api/getErrorMessage';
 import heroImg from '../assets/hero.png';
-import { SPECIALTIES } from '../constants/specialties';
+import { CLINICAL_SPECIALTIES } from '../constants/specialties';
 
 function RegisterPage() {
     const navigate = useNavigate();
@@ -100,7 +100,7 @@ function RegisterPage() {
                             onChange={handleChange}
                         >
                             <option value="">Seçiniz</option>
-                            {SPECIALTIES.map((specialty) => (
+                            {CLINICAL_SPECIALTIES.map((specialty) => (
                                 <option key={specialty} value={specialty}>
                                     {specialty}
                                 </option>

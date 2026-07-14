@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { listFlashcards, createFlashcard, updateFlashcard, deleteFlashcard } from '../api/flashcardsApi';
+import { Link, useSearchParams } from 'react-router-dom';
+import {
+    listFlashcards,
+    createFlashcard,
+    updateFlashcard,
+    deleteFlashcard,
+    reviewFlashcard,
+} from '../api/flashcardsApi';
 import getErrorMessage from '../api/getErrorMessage';
 import FlashcardStudy from '../components/FlashcardStudy';
 import FlashcardForm from '../components/FlashcardForm';
-import { SPECIALTIES, DIFFICULTIES } from '../constants/specialties';
+import FlashcardReviewSession from '../components/FlashcardReviewSession';
+import { EXAM_SUBJECTS, DIFFICULTIES } from '../constants/specialties';
 import './FlashcardsPage.css';
 
 function FlashcardsPage() {
@@ -13,14 +20,35 @@ function FlashcardsPage() {
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editingCard, setEditingCard] = useState(null);
-    const [filters, setFilters] = useState({ subject: '', difficulty: '' });
+    const [searchParams] = useSearchParams();
+    const [filters, setFilters] = useState({
+        subject: searchParams.get('subject') || '',
+        difficulty: '',
+        needsReview: searchParams.get('needsReview') === 'true',
+    });
+    const [dueCards, setDueCards] = useState([]);
+    const [reviewMode, setReviewMode] = useState(false);
+
+    function refreshDueCards() {
+        listFlashcards({ due: true })
+            .then(setDueCards)
+            .catch(() => setDueCards([]));
+    }
+
+    useEffect(() => {
+        refreshDueCards();
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
 
         setLoading(true);
         setError('');
-        listFlashcards(filters)
+        listFlashcards({
+            subject: filters.subject,
+            difficulty: filters.difficulty,
+            needsReview: filters.needsReview ? true : undefined,
+        })
             .then((data) => {
                 if (!cancelled) setCards(data);
             })
@@ -83,49 +111,117 @@ function FlashcardsPage() {
         setFilters((prev) => ({ ...prev, [name]: value }));
     }
 
+    async function handleToggleReview(card) {
+        const previousCards = cards;
+        const nextNeedsReview = !card.needs_review;
+
+        if (filters.needsReview && !nextNeedsReview) {
+            setCards((prev) => prev.filter((c) => c.id !== card.id));
+        } else {
+            setCards((prev) => prev.map((c) => (c.id === card.id ? { ...c, needs_review: nextNeedsReview } : c)));
+        }
+
+        try {
+            await updateFlashcard(card.id, { needsReview: nextNeedsReview });
+        } catch (err) {
+            setCards(previousCards);
+            setError(getErrorMessage(err));
+        }
+    }
+
+    async function handleRate(card, rating) {
+        try {
+            await reviewFlashcard(card.id, rating);
+        } catch (err) {
+            setError(getErrorMessage(err));
+        }
+    }
+
+    function handleFinishReview() {
+        setReviewMode(false);
+        refreshDueCards();
+    }
+
     return (
         <div className="flashcards-page">
             <header className="flashcards-header">
                 <Link to="/" className="flashcards-back">← Ana Sayfa</Link>
                 <h1>Çalışma Kartları</h1>
-                <button className="auth-submit" onClick={() => (showForm ? closeForm() : openCreateForm())}>
-                    {showForm ? 'Kapat' : '+ Yeni Kart'}
-                </button>
+                {!reviewMode && (
+                    <button className="auth-submit" onClick={() => (showForm ? closeForm() : openCreateForm())}>
+                        {showForm ? 'Kapat' : '+ Yeni Kart'}
+                    </button>
+                )}
             </header>
 
-            {showForm && <FlashcardForm initialCard={editingCard} onSubmit={handleSubmit} onCancel={closeForm} />}
-
-            <div className="flashcards-filters">
-                <select name="subject" value={filters.subject} onChange={handleFilterChange}>
-                    <option value="">Tüm Branşlar</option>
-                    {SPECIALTIES.map((specialty) => (
-                        <option key={specialty} value={specialty}>
-                            {specialty}
-                        </option>
-                    ))}
-                </select>
-                <select name="difficulty" value={filters.difficulty} onChange={handleFilterChange}>
-                    <option value="">Tüm Zorluklar</option>
-                    {DIFFICULTIES.map((level) => (
-                        <option key={level} value={level}>
-                            {level}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {error && <div className="auth-error">{error}</div>}
-
-            {loading ? (
-                <p className="flashcards-status">Yükleniyor...</p>
-            ) : cards.length === 0 ? (
-                <p className="flashcards-status">Henüz kart yok. Yukarıdan ilk kartını ekle!</p>
+            {reviewMode ? (
+                <FlashcardReviewSession cards={dueCards} onRate={handleRate} onFinish={handleFinishReview} />
             ) : (
-                <div className="flashcards-grid">
-                    {cards.map((card) => (
-                        <FlashcardStudy key={card.id} card={card} onDelete={handleDelete} onEdit={openEditForm} />
-                    ))}
-                </div>
+                <>
+                    {dueCards.length > 0 && (
+                        <div className="due-review-banner">
+                            <span>Bugün tekrar edilecek <strong>{dueCards.length}</strong> kartın var.</span>
+                            <button className="auth-submit" onClick={() => setReviewMode(true)}>
+                                Tekrarı Başlat
+                            </button>
+                        </div>
+                    )}
+
+                    {showForm && <FlashcardForm initialCard={editingCard} onSubmit={handleSubmit} onCancel={closeForm} />}
+
+                    <div className="flashcards-filters">
+                        <select name="subject" value={filters.subject} onChange={handleFilterChange}>
+                            <option value="">Tüm Branşlar</option>
+                            {EXAM_SUBJECTS.map((specialty) => (
+                                <option key={specialty} value={specialty}>
+                                    {specialty}
+                                </option>
+                            ))}
+                        </select>
+                        <select name="difficulty" value={filters.difficulty} onChange={handleFilterChange}>
+                            <option value="">Tüm Zorluklar</option>
+                            {DIFFICULTIES.map((level) => (
+                                <option key={level} value={level}>
+                                    {level}
+                                </option>
+                            ))}
+                        </select>
+                        <label className="flashcards-review-filter">
+                            <input
+                                type="checkbox"
+                                checked={filters.needsReview}
+                                onChange={(event) =>
+                                    setFilters((prev) => ({ ...prev, needsReview: event.target.checked }))
+                                }
+                            />
+                            Sadece Hata Kutusu ★
+                        </label>
+                    </div>
+
+                    {error && <div className="auth-error">{error}</div>}
+
+                    {loading ? (
+                        <p className="flashcards-status">Yükleniyor...</p>
+                    ) : cards.length === 0 ? (
+                        <p className="flashcards-status">
+                            {filters.needsReview
+                                ? 'Hata kutusu boş. Zorlandığın kartları yıldızlayarak buraya ekleyebilirsin.'
+                                : 'Henüz kart yok. Yukarıdan ilk kartını ekle!'}
+                        </p>
+                    ) : (
+                        <div className="flashcards-grid">
+                            {cards.map((card) => (
+                                <FlashcardStudy
+                                    key={card.id}
+                                    card={card}
+                                    onDelete={handleDelete}
+                                    onEdit={openEditForm}
+                                    onToggleReview={handleToggleReview}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </>
             )}
         </div>
     );

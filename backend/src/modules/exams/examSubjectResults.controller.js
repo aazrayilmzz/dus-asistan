@@ -110,8 +110,18 @@ async function remove(req, res) {
     }
 }
 
+async function weakSubjects(req, res) {
+    try {
+        const results = await examSubjectResultsService.getWeakSubjects(req.user.userId);
+        res.status(200).json({ status: 'success', data: results });
+    } catch (error) {
+        sendError(res, error);
+    }
+}
+
 module.exports = {
     summary,
+    weakSubjects,
     create,
     list,
     update,

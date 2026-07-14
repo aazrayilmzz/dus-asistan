@@ -1,11 +1,11 @@
 const pool = require('../../config/db');
 
-async function startSession({ userId, subject, durationMinutes }) {
+async function startSession({ userId, subject, detail, durationMinutes }) {
     const result = await pool.query(
-        `INSERT INTO pomodoro_sessions (user_id, subject, duration_minutes)
-         VALUES ($1, $2, $3)
+        `INSERT INTO pomodoro_sessions (user_id, subject, detail, duration_minutes)
+         VALUES ($1, $2, $3, $4)
          RETURNING *`,
-        [userId, subject, durationMinutes]
+        [userId, subject, detail, durationMinutes]
     );
     return result.rows[0];
 }
@@ -59,6 +59,18 @@ async function getCompletedSessionDays(userId) {
     return result.rows.map((row) => row.day);
 }
 
+async function getWeeklySummary(userId, weekStart, weekEnd) {
+    const result = await pool.query(
+        `SELECT subject, SUM(duration_minutes)::int AS total_minutes
+         FROM pomodoro_sessions
+         WHERE user_id = $1 AND status = 'completed' AND started_at >= $2 AND started_at < $3
+         GROUP BY subject
+         ORDER BY total_minutes DESC`,
+        [userId, weekStart, weekEnd]
+    );
+    return result.rows;
+}
+
 module.exports = {
     startSession,
     completeSession,
@@ -66,4 +78,5 @@ module.exports = {
     getActiveSession,
     getHistory,
     getCompletedSessionDays,
+    getWeeklySummary,
 };

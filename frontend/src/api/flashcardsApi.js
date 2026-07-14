@@ -18,3 +18,8 @@ export async function updateFlashcard(id, data) {
 export async function deleteFlashcard(id) {
     await axiosClient.delete(`/flashcards/${id}`);
 }
+
+export async function reviewFlashcard(id, rating) {
+    const response = await axiosClient.patch(`/flashcards/${id}/review`, { rating });
+    return response.data.data;
+}

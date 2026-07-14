@@ -9,6 +9,7 @@ router.use(authenticate);
 router.post('/', flashcardsController.create);
 router.get('/', flashcardsController.list);
 router.put('/:id', flashcardsController.update);
+router.patch('/:id/review', flashcardsController.review);
 router.delete('/:id', flashcardsController.remove);
 
 module.exports = router;

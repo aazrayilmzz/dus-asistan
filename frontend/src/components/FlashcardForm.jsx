@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { SPECIALTIES, DIFFICULTIES } from '../constants/specialties';
+import { EXAM_SUBJECTS, DIFFICULTIES } from '../constants/specialties';
 
-const EMPTY_FORM = { question: '', answer: '', subject: SPECIALTIES[0], difficulty: 'orta' };
+const EMPTY_FORM = { question: '', answer: '', subject: EXAM_SUBJECTS[0], difficulty: 'orta' };
 
 function FlashcardForm({ initialCard, onSubmit, onCancel }) {
     const isEditing = !!initialCard;
@@ -56,7 +56,7 @@ function FlashcardForm({ initialCard, onSubmit, onCancel }) {
                 <div className="field">
                     <label htmlFor="subject">Branş</label>
                     <select id="subject" name="subject" value={formData.subject} onChange={handleChange}>
-                        {SPECIALTIES.map((specialty) => (
+                        {EXAM_SUBJECTS.map((specialty) => (
                             <option key={specialty} value={specialty}>
                                 {specialty}
                             </option>

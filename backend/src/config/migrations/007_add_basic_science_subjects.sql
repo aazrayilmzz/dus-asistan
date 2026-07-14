@@ -1,4 +1,6 @@
-export const CLINICAL_SPECIALTIES = [
+ALTER TABLE exam_subject_results DROP CONSTRAINT exam_subject_results_subject_check;
+
+ALTER TABLE exam_subject_results ADD CONSTRAINT exam_subject_results_subject_check CHECK (subject IN (
     'Ağız, Diş ve Çene Cerrahisi',
     'Ağız, Diş ve Çene Radyolojisi',
     'Endodonti',
@@ -7,18 +9,11 @@ export const CLINICAL_SPECIALTIES = [
     'Periodontoloji',
     'Protetik Diş Tedavisi',
     'Restoratif Diş Tedavisi',
-];
-
-export const BASIC_SCIENCES = [
     'Anatomi',
     'Fizyoloji',
     'Biyokimya',
     'Histoloji-Embriyoloji',
     'Mikrobiyoloji',
     'Patoloji',
-    'Farmakoloji',
-];
-
-export const EXAM_SUBJECTS = [...CLINICAL_SPECIALTIES, ...BASIC_SCIENCES];
-
-export const DIFFICULTIES = ['kolay', 'orta', 'zor'];
+    'Farmakoloji'
+));

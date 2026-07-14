@@ -10,6 +10,13 @@ const ALLOWED_SUBJECTS = [
     'Periodontoloji',
     'Protetik Diş Tedavisi',
     'Restoratif Diş Tedavisi',
+    'Anatomi',
+    'Fizyoloji',
+    'Biyokimya',
+    'Histoloji-Embriyoloji',
+    'Mikrobiyoloji',
+    'Patoloji',
+    'Farmakoloji',
 ];
 
 const DUPLICATE_SUBJECT_CONSTRAINT = 'exam_subject_results_exam_id_subject_key';
@@ -106,10 +113,38 @@ async function deleteSubjectResult(userId, resultId) {
     }
 }
 
+function computeNet(correctCount, wrongCount) {
+    return correctCount - wrongCount / 4;
+}
+
+async function getWeakSubjects(userId) {
+    const rows = await examSubjectResultsRepository.findSubjectHistoryByUserId(userId);
+
+    const bySubject = new Map();
+    for (const row of rows) {
+        const nets = bySubject.get(row.subject) ?? [];
+        nets.push(computeNet(row.correct_count, row.wrong_count));
+        bySubject.set(row.subject, nets);
+    }
+
+    const declining = [];
+    for (const [subject, nets] of bySubject) {
+        if (nets.length < 3) continue;
+
+        const [first, second, third] = nets.slice(-3);
+        if (first > second && second > third) {
+            declining.push({ subject, nets: [first, second, third], drop: first - third });
+        }
+    }
+
+    return declining.sort((a, b) => b.drop - a.drop);
+}
+
 module.exports = {
     createSubjectResult,
     getSubjectSummary,
     getExamSubjectResults,
     updateSubjectResult,
     deleteSubjectResult,
+    getWeakSubjects,
 };

@@ -1,0 +1,1 @@
+ALTER TABLE flashcards ADD COLUMN needs_review BOOLEAN NOT NULL DEFAULT false;

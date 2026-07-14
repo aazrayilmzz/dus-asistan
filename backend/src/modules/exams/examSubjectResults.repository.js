@@ -37,6 +37,18 @@ async function findAllByExamId(examId, userId) {
     return result.rows;
 }
 
+async function findSubjectHistoryByUserId(userId) {
+    const result = await pool.query(
+        `SELECT esr.subject, esr.correct_count, esr.wrong_count, e.exam_date
+         FROM exam_subject_results esr
+         JOIN exams e ON e.id = esr.exam_id
+         WHERE e.user_id = $1
+         ORDER BY e.exam_date ASC, e.id ASC`,
+        [userId]
+    );
+    return result.rows;
+}
+
 async function findByIdAndUserId(id, userId) {
     const result = await pool.query(
         `SELECT esr.*
@@ -74,6 +86,7 @@ async function deleteByIdAndUserId(id, userId) {
 module.exports = {
     create,
     findSubjectSummaryByUserId,
+    findSubjectHistoryByUserId,
     findAllByExamId,
     findByIdAndUserId,
     update,

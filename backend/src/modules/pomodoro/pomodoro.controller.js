@@ -20,10 +20,10 @@ function parseId(req, res) {
 }
 
 async function start(req, res) {
-    const { subject, durationMinutes } = req.body;
+    const { subject, detail, durationMinutes } = req.body;
 
     try {
-        const session = await pomodoroService.startSession(req.user.userId, { subject, durationMinutes });
+        const session = await pomodoroService.startSession(req.user.userId, { subject, detail, durationMinutes });
         res.status(201).json({ status: 'success', data: session });
     } catch (error) {
         sendError(res, error);
@@ -81,6 +81,15 @@ async function streak(req, res) {
     }
 }
 
+async function weeklySummary(req, res) {
+    try {
+        const result = await pomodoroService.getWeeklySummary(req.user.userId);
+        res.status(200).json({ status: 'success', data: result });
+    } catch (error) {
+        sendError(res, error);
+    }
+}
+
 module.exports = {
     start,
     complete,
@@ -88,4 +97,5 @@ module.exports = {
     active,
     history,
     streak,
+    weeklySummary,
 };

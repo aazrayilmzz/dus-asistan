@@ -24,6 +24,11 @@ export async function getSubjectSummary() {
     return response.data.data;
 }
 
+export async function getWeakSubjects() {
+    const response = await axiosClient.get('/exams/subjects/weak');
+    return response.data.data;
+}
+
 export async function createSubjectResult(examId, data) {
     const response = await axiosClient.post(`/exams/${examId}/subjects`, data);
     return response.data.data;

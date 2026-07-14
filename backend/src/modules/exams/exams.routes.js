@@ -13,6 +13,7 @@ router.put('/:id', examsController.update);
 router.delete('/:id', examsController.remove);
 
 router.get('/subjects/summary', examSubjectResultsController.summary);
+router.get('/subjects/weak', examSubjectResultsController.weakSubjects);
 
 router.post('/:examId/subjects', examSubjectResultsController.create);
 router.get('/:examId/subjects', examSubjectResultsController.list);

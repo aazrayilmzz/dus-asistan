@@ -38,10 +38,15 @@ async function create(req, res) {
 }
 
 async function list(req, res) {
-    const { subject, difficulty } = req.query;
+    const { subject, difficulty, needsReview, due } = req.query;
 
     try {
-        const cards = await flashcardsService.getUserFlashcards(req.user.userId, { subject, difficulty });
+        const cards = await flashcardsService.getUserFlashcards(req.user.userId, {
+            subject,
+            difficulty,
+            needsReview: needsReview === undefined ? undefined : needsReview === 'true',
+            due: due === 'true',
+        });
         res.status(200).json({ status: 'success', data: cards });
     } catch (error) {
         sendError(res, error);
@@ -52,10 +57,16 @@ async function update(req, res) {
     const id = parseId(req, res);
     if (id === null) return;
 
-    const { question, answer, subject, difficulty } = req.body;
+    const { question, answer, subject, difficulty, needsReview } = req.body;
 
     try {
-        const card = await flashcardsService.updateFlashcard(req.user.userId, id, { question, answer, subject, difficulty });
+        const card = await flashcardsService.updateFlashcard(req.user.userId, id, {
+            question,
+            answer,
+            subject,
+            difficulty,
+            needsReview,
+        });
         res.status(200).json({ status: 'success', data: card });
     } catch (error) {
         sendError(res, error);
@@ -74,9 +85,31 @@ async function remove(req, res) {
     }
 }
 
+async function review(req, res) {
+    const id = parseId(req, res);
+    if (id === null) return;
+
+    const { rating } = req.body;
+
+    if (!rating) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'rating alanı zorunludur.',
+        });
+    }
+
+    try {
+        const card = await flashcardsService.reviewFlashcard(req.user.userId, id, rating);
+        res.status(200).json({ status: 'success', data: card });
+    } catch (error) {
+        sendError(res, error);
+    }
+}
+
 module.exports = {
     create,
     list,
     update,
     remove,
+    review,
 };
