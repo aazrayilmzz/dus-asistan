@@ -48,10 +48,22 @@ async function getHistory(userId) {
     return result.rows;
 }
 
+async function getCompletedSessionDays(userId) {
+    const result = await pool.query(
+        `SELECT DISTINCT to_char(started_at, 'YYYY-MM-DD') AS day
+         FROM pomodoro_sessions
+         WHERE user_id = $1 AND status = 'completed'
+         ORDER BY day DESC`,
+        [userId]
+    );
+    return result.rows.map((row) => row.day);
+}
+
 module.exports = {
     startSession,
     completeSession,
     abandonSession,
     getActiveSession,
     getHistory,
+    getCompletedSessionDays,
 };

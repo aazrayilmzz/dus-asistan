@@ -72,10 +72,20 @@ async function history(req, res) {
     }
 }
 
+async function streak(req, res) {
+    try {
+        const result = await pomodoroService.getStreak(req.user.userId);
+        res.status(200).json({ status: 'success', data: result });
+    } catch (error) {
+        sendError(res, error);
+    }
+}
+
 module.exports = {
     start,
     complete,
     abandon,
     active,
     history,
+    streak,
 };

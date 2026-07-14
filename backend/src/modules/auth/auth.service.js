@@ -4,7 +4,7 @@ const authRepository = require('./auth.repository');
 
 const SALT_ROUNDS = 10;
 
-async function registerUser({ email, password, fullName, targetSpecialty, targetScore }) {
+async function registerUser({ email, password, fullName, targetSpecialty, targetScore, targetExamDate }) {
     const existingUser = await authRepository.findByEmail(email);
     if (existingUser) {
         const error = new Error('Bu e-posta adresi zaten kayıtlı.');
@@ -20,6 +20,7 @@ async function registerUser({ email, password, fullName, targetSpecialty, target
         fullName,
         targetSpecialty,
         targetScore,
+        targetExamDate,
     });
 }
 
@@ -52,6 +53,8 @@ async function loginUser({ email, password }) {
             fullName: user.full_name,
             targetSpecialty: user.target_specialty,
             targetScore: user.target_score,
+            targetExamDate: user.target_exam_date,
+            createdAt: user.created_at,
         },
     };
 }
@@ -66,8 +69,27 @@ async function getUserProfile(userId) {
     return user;
 }
 
+async function updateTargetExamDate(userId, targetExamDate) {
+    const user = await authRepository.updateTargetExamDate(userId, targetExamDate ?? null);
+    if (!user) {
+        const error = new Error('Kullanıcı bulunamadı.');
+        error.statusCode = 404;
+        throw error;
+    }
+    return {
+        id: user.id,
+        email: user.email,
+        fullName: user.full_name,
+        targetSpecialty: user.target_specialty,
+        targetScore: user.target_score,
+        targetExamDate: user.target_exam_date,
+        createdAt: user.created_at,
+    };
+}
+
 module.exports = {
     registerUser,
     loginUser,
     getUserProfile,
+    updateTargetExamDate,
 };

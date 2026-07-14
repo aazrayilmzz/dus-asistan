@@ -24,3 +24,8 @@ export async function getHistory() {
     const response = await axiosClient.get('/pomodoro');
     return response.data.data;
 }
+
+export async function getStreak() {
+    const response = await axiosClient.get('/pomodoro/streak');
+    return response.data.data;
+}

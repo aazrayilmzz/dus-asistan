@@ -13,6 +13,7 @@ function RegisterPage() {
         fullName: '',
         targetSpecialty: '',
         targetScore: '',
+        targetExamDate: '',
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -34,6 +35,7 @@ function RegisterPage() {
                 fullName: formData.fullName,
                 targetSpecialty: formData.targetSpecialty,
                 targetScore: formData.targetScore ? Number(formData.targetScore) : undefined,
+                targetExamDate: formData.targetExamDate,
             });
             navigate('/login', { state: { registered: true } });
         } catch (err) {
@@ -104,6 +106,17 @@ function RegisterPage() {
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className="field">
+                        <label htmlFor="targetExamDate">Hedef Sınav Tarihi (opsiyonel)</label>
+                        <input
+                            id="targetExamDate"
+                            name="targetExamDate"
+                            type="date"
+                            value={formData.targetExamDate}
+                            onChange={handleChange}
+                        />
                     </div>
 
                     <div className="field">

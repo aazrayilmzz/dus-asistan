@@ -1,9 +1,181 @@
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logoIcon from '../assets/logo-icon.png';
+import { updateProfile } from '../api/authApi';
+import { getStreak } from '../api/pomodoroApi';
+import { getTipOfTheDay } from '../constants/dailyTips';
+
+function FlashcardIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="6" width="14" height="14" rx="2" />
+            <path d="M7 6V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2" />
+        </svg>
+    );
+}
+
+function ExamIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="5" y="3" width="14" height="18" rx="2" />
+            <path d="M9 3v2h6V3M8 12l2 2 4-4M8 17h6" />
+        </svg>
+    );
+}
+
+function ClockIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="13" r="8" />
+            <path d="M12 9v4l3 2M9 2h6" />
+        </svg>
+    );
+}
+
+function ChartIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 20V11M11 20V5M17 20v-6M21 20H3" />
+        </svg>
+    );
+}
+
+function LogoutIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5M21 12H9" />
+        </svg>
+    );
+}
+
+function FlameIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.545 3.75 3.75 0 0 1 3.255 3.717Z" />
+        </svg>
+    );
+}
+
+function toTitleCase(fullName) {
+    return fullName
+        .split(' ')
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toLocaleUpperCase('tr-TR') + word.slice(1).toLocaleLowerCase('tr-TR'))
+        .join(' ');
+}
+
+function getDaysUntil(targetDateStr) {
+    const target = new Date(`${targetDateStr}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.round((target - today) / (24 * 60 * 60 * 1000));
+}
+
+function getExamProgress(createdAt, targetExamDate) {
+    if (!createdAt || !targetExamDate) return null;
+
+    const start = new Date(createdAt);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(`${targetExamDate}T00:00:00`);
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const totalMs = end - start;
+    if (totalMs <= 0) return null;
+
+    const pct = ((now - start) / totalMs) * 100;
+    return Math.min(100, Math.max(0, pct));
+}
+
+const MENU_ITEMS = [
+    { to: '/flashcards', label: 'Çalışma Kartları', Icon: FlashcardIcon },
+    { to: '/exams', label: 'Denemeler', Icon: ExamIcon },
+    { to: '/pomodoro', label: 'Pomodoro', Icon: ClockIcon },
+    { to: '/dashboard', label: 'İlerleme Grafikleri', Icon: ChartIcon },
+];
+
+function ExamCountdown({ targetExamDate, createdAt, onSave }) {
+    const [editing, setEditing] = useState(!targetExamDate);
+    const [date, setDate] = useState('');
+    const [saving, setSaving] = useState(false);
+
+    if (editing) {
+        return (
+            <form
+                className="countdown-card countdown-setup"
+                onSubmit={async (event) => {
+                    event.preventDefault();
+                    if (!date) return;
+                    setSaving(true);
+                    await onSave(date);
+                    setSaving(false);
+                    setEditing(false);
+                }}
+            >
+                <label htmlFor="targetExamDate">DUS sınav tarihini belirle</label>
+                <div className="countdown-setup-row">
+                    <input
+                        id="targetExamDate"
+                        type="date"
+                        value={date}
+                        onChange={(event) => setDate(event.target.value)}
+                        required
+                    />
+                    <button type="submit" disabled={saving}>
+                        {saving ? 'Kaydediliyor...' : 'Kaydet'}
+                    </button>
+                </div>
+            </form>
+        );
+    }
+
+    const daysLeft = getDaysUntil(targetExamDate);
+    const progressPct = getExamProgress(createdAt, targetExamDate);
+
+    return (
+        <div className="countdown-card">
+            {daysLeft > 0 && (
+                <>
+                    <span className="countdown-number">{daysLeft}</span>
+                    <span className="countdown-label">DUS'a kalan gün</span>
+                </>
+            )}
+            {daysLeft === 0 && <span className="countdown-label">Bugün DUS günü, başarılar!</span>}
+            {daysLeft < 0 && <span className="countdown-label">Sınav tarihin geçti.</span>}
+            {progressPct !== null && (
+                <div className="countdown-progress">
+                    <div className="countdown-progress-fill" style={{ width: `${progressPct}%` }} />
+                </div>
+            )}
+            <button type="button" className="countdown-edit" onClick={() => setEditing(true)}>
+                Tarihi değiştir
+            </button>
+        </div>
+    );
+}
+
+function StreakBadge({ streak }) {
+    if (streak === null) return null;
+
+    return (
+        <div className="header-streak">
+            <FlameIcon />
+            <span>{streak > 0 ? `${streak} günlük seri` : 'Seri başlat'}</span>
+        </div>
+    );
+}
 
 function HomePage() {
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('dusasistan_user'));
+    const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('dusasistan_user')));
+    const [streak, setStreak] = useState(null);
+
+    useEffect(() => {
+        getStreak()
+            .then((result) => setStreak(result.streak))
+            .catch(() => setStreak(null));
+    }, []);
 
     function handleLogout() {
         localStorage.removeItem('dusasistan_token');
@@ -11,18 +183,42 @@ function HomePage() {
         navigate('/login');
     }
 
+    async function handleSaveExamDate(targetExamDate) {
+        const updated = await updateProfile({ targetExamDate });
+        const nextUser = { ...user, targetExamDate: updated.targetExamDate };
+        localStorage.setItem('dusasistan_user', JSON.stringify(nextUser));
+        setUser(nextUser);
+    }
+
     return (
         <div className="home-page">
-            <img src={logoIcon} className="home-logo" alt="DUS Asistan" />
-            <h1>Hoş geldin, {user.fullName}</h1>
-            <p>{user.targetSpecialty ? `Hedef branş: ${user.targetSpecialty}` : 'Henüz bir hedef branş seçmedin.'}</p>
-            <Link to="/flashcards" className="home-link">Çalışma Kartları</Link>
-            <Link to="/exams" className="home-link">Denemeler</Link>
-            <Link to="/pomodoro" className="home-link">Pomodoro</Link>
-            <Link to="/dashboard" className="home-link">İlerleme Grafikleri</Link>
-            <button className="home-logout" onClick={handleLogout}>
-                Çıkış Yap
-            </button>
+            <header className="home-topbar">
+                <img src={logoIcon} className="home-logo" alt="DUS Asistan" />
+                <StreakBadge streak={streak} />
+                <button className="home-logout" onClick={handleLogout} title="Çıkış Yap" aria-label="Çıkış Yap">
+                    <LogoutIcon />
+                </button>
+            </header>
+
+            <div className="home-greeting">
+                <h1>Hoş geldin, {toTitleCase(user.fullName)}</h1>
+                <p>{user.targetSpecialty ? `Hedef branş: ${user.targetSpecialty}` : 'Henüz bir hedef branş seçmedin.'}</p>
+            </div>
+
+            <div className="home-stats-row">
+                <ExamCountdown targetExamDate={user.targetExamDate} createdAt={user.createdAt} onSave={handleSaveExamDate} />
+            </div>
+
+            <p className="daily-tip">{getTipOfTheDay()}</p>
+
+            <nav className="home-grid">
+                {MENU_ITEMS.map(({ to, label, Icon }) => (
+                    <Link key={to} to={to} className="home-card">
+                        <Icon />
+                        <span>{label}</span>
+                    </Link>
+                ))}
+            </nav>
         </div>
     );
 }

@@ -11,7 +11,7 @@ function sendError(res, error) {
 }
 
 async function register(req, res) {
-    const { email, password, fullName, targetSpecialty, targetScore } = req.body;
+    const { email, password, fullName, targetSpecialty, targetScore, targetExamDate } = req.body;
 
     if (!email || !password || !fullName) {
         return res.status(400).json({
@@ -21,7 +21,7 @@ async function register(req, res) {
     }
 
     try {
-        const user = await authService.registerUser({ email, password, fullName, targetSpecialty, targetScore });
+        const user = await authService.registerUser({ email, password, fullName, targetSpecialty, targetScore, targetExamDate });
         res.status(201).json({ status: 'success', data: user });
     } catch (error) {
         sendError(res, error);
@@ -55,8 +55,27 @@ async function me(req, res) {
     }
 }
 
+async function updateProfile(req, res) {
+    const { targetExamDate } = req.body;
+
+    if (targetExamDate !== undefined && targetExamDate !== null && Number.isNaN(Date.parse(targetExamDate))) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'targetExamDate geçerli bir tarih olmalıdır.',
+        });
+    }
+
+    try {
+        const user = await authService.updateTargetExamDate(req.user.userId, targetExamDate);
+        res.status(200).json({ status: 'success', data: user });
+    } catch (error) {
+        sendError(res, error);
+    }
+}
+
 module.exports = {
     register,
     login,
     me,
+    updateProfile,
 };

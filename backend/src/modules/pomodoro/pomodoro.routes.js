@@ -10,6 +10,7 @@ router.post('/start', pomodoroController.start);
 router.patch('/:id/complete', pomodoroController.complete);
 router.patch('/:id/abandon', pomodoroController.abandon);
 router.get('/active', pomodoroController.active);
+router.get('/streak', pomodoroController.streak);
 router.get('/', pomodoroController.history);
 
 module.exports = router;

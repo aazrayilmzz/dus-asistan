@@ -119,35 +119,235 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
   padding: 24px;
   text-align: center;
+  gap: 32px;
+}
+
+.home-topbar {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .home-logo {
-  width: 72px;
+  width: 56px;
   height: auto;
-  margin-bottom: 4px;
 }
 
-.home-link {
+.home-greeting h1 {
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+
+.home-greeting p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.home-stats-row {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.countdown-card {
+  flex: 1 1 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+}
+
+.countdown-number {
+  font-size: 32px;
+  font-weight: 700;
   color: var(--accent);
-  font-weight: 600;
-  text-decoration: none;
+  line-height: 1;
+}
+
+.countdown-label {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.countdown-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
   margin-top: 8px;
 }
 
-.home-link:hover {
+.countdown-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.countdown-edit {
+  font: inherit;
+  font-size: 12px;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+  padding: 0;
+}
+
+.countdown-edit:hover {
   text-decoration: underline;
 }
 
-.home-logout {
+.countdown-setup {
+  gap: 10px;
+}
+
+.countdown-setup label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.countdown-setup-row {
+  display: flex;
+  gap: 8px;
+}
+
+.countdown-setup-row input {
   font: inherit;
-  padding: 8px 16px;
+  padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: transparent;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.countdown-setup-row button {
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.countdown-setup-row button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.header-streak {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent-warm-bg);
+  color: var(--text-h);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.header-streak svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-warm);
+}
+
+.daily-tip {
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.home-grid {
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  box-shadow: var(--shadow);
+  color: var(--text-h);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.home-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.home-card svg {
+  width: 26px;
+  height: 26px;
+  color: var(--accent);
+}
+
+@media (max-width: 380px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.home-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
   color: var(--text-h);
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-logout:hover {
+  background: var(--error-bg);
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.home-logout svg {
+  width: 20px;
+  height: 20px;
 }
