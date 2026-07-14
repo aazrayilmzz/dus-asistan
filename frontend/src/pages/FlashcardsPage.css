@@ -28,6 +28,63 @@
   text-decoration: underline;
 }
 
+.flashcards-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.flashcards-ai-btn {
+  font: inherit;
+  font-weight: 600;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.flashcards-ai-btn:hover {
+  background: var(--accent-bg);
+}
+
+.ai-generate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.ai-generate-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.ai-generate-row {
+  display: flex;
+  gap: 16px;
+}
+
+.ai-generate-row .field {
+  flex: 1;
+}
+
+.card-ai-badge {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
 .flashcards-filters {
   display: flex;
   gap: 12px;

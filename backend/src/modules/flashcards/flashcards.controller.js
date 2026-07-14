@@ -106,10 +106,29 @@ async function review(req, res) {
     }
 }
 
+async function generate(req, res) {
+    const { subject, count } = req.body;
+
+    if (!subject) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'subject alanı zorunludur.',
+        });
+    }
+
+    try {
+        const cards = await flashcardsService.generateFlashcards(req.user.userId, { subject, count });
+        res.status(201).json({ status: 'success', data: cards });
+    } catch (error) {
+        sendError(res, error);
+    }
+}
+
 module.exports = {
     create,
     list,
     update,
     remove,
     review,
+    generate,
 };

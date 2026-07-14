@@ -1,4 +1,5 @@
 const flashcardsRepository = require('./flashcards.repository');
+const questionGenerator = require('./questionGenerator.service');
 
 const ALLOWED_DIFFICULTIES = ['kolay', 'orta', 'zor'];
 
@@ -94,10 +95,57 @@ async function reviewFlashcard(userId, cardId, rating) {
     return updated;
 }
 
+function normalizeCount(count) {
+    if (count === undefined) return 5;
+
+    const parsed = Number(count);
+    if (!Number.isInteger(parsed) || parsed < 1 || parsed > 20) {
+        const error = new Error('count 1 ile 20 arasında bir tam sayı olmalıdır.');
+        error.statusCode = 400;
+        throw error;
+    }
+    return parsed;
+}
+
+async function generateFlashcards(userId, { subject, count }) {
+    if (!subject) {
+        const error = new Error('subject alanı zorunludur.');
+        error.statusCode = 400;
+        throw error;
+    }
+
+    const normalizedCount = normalizeCount(count);
+
+    const existingCards = await flashcardsRepository.findAllByUserId(userId, { subject });
+    const existingQuestions = existingCards.map((card) => card.question);
+
+    const generated = await questionGenerator.generateQuestions({
+        subject,
+        count: normalizedCount,
+        existingQuestions,
+    });
+
+    const created = [];
+    for (const item of generated) {
+        const card = await flashcardsRepository.create({
+            userId,
+            question: item.question,
+            answer: item.answer,
+            subject,
+            difficulty: 'orta',
+            isAiGenerated: true,
+        });
+        created.push(card);
+    }
+
+    return created;
+}
+
 module.exports = {
     createFlashcard,
     getUserFlashcards,
     updateFlashcard,
     deleteFlashcard,
     reviewFlashcard,
+    generateFlashcards,
 };

@@ -23,6 +23,7 @@ function FlashcardStudy({ card, onDelete, onEdit, onToggleReview }) {
             <div className={`flip-card-inner ${flipped ? 'flipped' : ''}`}>
                 <div className="flip-card-face flip-card-front">
                     <span className={`card-difficulty diff-${card.difficulty}`}>{card.difficulty}</span>
+                    {card.is_ai_generated && <span className="card-ai-badge">AI Üretimi</span>}
                     <p className="card-text">{card.question}</p>
                     <span className="card-subject">{card.subject}</span>
                 </div>

@@ -6,11 +6,13 @@ import {
     updateFlashcard,
     deleteFlashcard,
     reviewFlashcard,
+    generateFlashcards,
 } from '../api/flashcardsApi';
 import getErrorMessage from '../api/getErrorMessage';
 import FlashcardStudy from '../components/FlashcardStudy';
 import FlashcardForm from '../components/FlashcardForm';
 import FlashcardReviewSession from '../components/FlashcardReviewSession';
+import AiGenerateForm from '../components/AiGenerateForm';
 import { EXAM_SUBJECTS, DIFFICULTIES } from '../constants/specialties';
 import './FlashcardsPage.css';
 
@@ -28,6 +30,7 @@ function FlashcardsPage() {
     });
     const [dueCards, setDueCards] = useState([]);
     const [reviewMode, setReviewMode] = useState(false);
+    const [showAiForm, setShowAiForm] = useState(false);
 
     function refreshDueCards() {
         listFlashcards({ due: true })
@@ -94,6 +97,16 @@ function FlashcardsPage() {
         }
     }
 
+    async function handleGenerate({ subject, count }) {
+        try {
+            const created = await generateFlashcards({ subject, count });
+            setCards((prev) => [...created, ...prev]);
+            setShowAiForm(false);
+        } catch (err) {
+            throw new Error(getErrorMessage(err));
+        }
+    }
+
     async function handleDelete(id) {
         const previousCards = cards;
         setCards((prev) => prev.filter((card) => card.id !== id));
@@ -148,9 +161,30 @@ function FlashcardsPage() {
                 <Link to="/" className="flashcards-back">← Ana Sayfa</Link>
                 <h1>Çalışma Kartları</h1>
                 {!reviewMode && (
-                    <button className="auth-submit" onClick={() => (showForm ? closeForm() : openCreateForm())}>
-                        {showForm ? 'Kapat' : '+ Yeni Kart'}
-                    </button>
+                    <div className="flashcards-header-actions">
+                        <button
+                            className="flashcards-ai-btn"
+                            onClick={() => {
+                                setShowAiForm((prev) => !prev);
+                                if (showForm) closeForm();
+                            }}
+                        >
+                            {showAiForm ? 'Kapat' : 'AI ile Soru Üret'}
+                        </button>
+                        <button
+                            className="auth-submit"
+                            onClick={() => {
+                                if (showForm) {
+                                    closeForm();
+                                } else {
+                                    openCreateForm();
+                                    setShowAiForm(false);
+                                }
+                            }}
+                        >
+                            {showForm ? 'Kapat' : '+ Yeni Kart'}
+                        </button>
+                    </div>
                 )}
             </header>
 
@@ -165,6 +199,10 @@ function FlashcardsPage() {
                                 Tekrarı Başlat
                             </button>
                         </div>
+                    )}
+
+                    {showAiForm && (
+                        <AiGenerateForm onGenerate={handleGenerate} onCancel={() => setShowAiForm(false)} />
                     )}
 
                     {showForm && <FlashcardForm initialCard={editingCard} onSubmit={handleSubmit} onCancel={closeForm} />}

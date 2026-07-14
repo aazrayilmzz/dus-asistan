@@ -7,6 +7,7 @@ const router = express.Router();
 router.use(authenticate);
 
 router.post('/', flashcardsController.create);
+router.post('/generate', flashcardsController.generate);
 router.get('/', flashcardsController.list);
 router.put('/:id', flashcardsController.update);
 router.patch('/:id/review', flashcardsController.review);

@@ -23,3 +23,8 @@ export async function reviewFlashcard(id, rating) {
     const response = await axiosClient.patch(`/flashcards/${id}/review`, { rating });
     return response.data.data;
 }
+
+export async function generateFlashcards({ subject, count }) {
+    const response = await axiosClient.post('/flashcards/generate', { subject, count });
+    return response.data.data;
+}

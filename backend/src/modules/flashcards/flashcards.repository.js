@@ -1,11 +1,11 @@
 const pool = require('../../config/db');
 
-async function create({ userId, question, answer, subject, difficulty }) {
+async function create({ userId, question, answer, subject, difficulty, isAiGenerated = false }) {
     const result = await pool.query(
-        `INSERT INTO flashcards (user_id, question, answer, subject, difficulty)
-         VALUES ($1, $2, $3, $4, $5)
+        `INSERT INTO flashcards (user_id, question, answer, subject, difficulty, is_ai_generated)
+         VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *`,
-        [userId, question, answer, subject, difficulty]
+        [userId, question, answer, subject, difficulty, isAiGenerated]
     );
     return result.rows[0];
 }
