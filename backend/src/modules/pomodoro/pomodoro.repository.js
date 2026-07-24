@@ -48,17 +48,6 @@ async function getHistory(userId) {
     return result.rows;
 }
 
-async function getCompletedSessionDays(userId) {
-    const result = await pool.query(
-        `SELECT DISTINCT to_char(started_at, 'YYYY-MM-DD') AS day
-         FROM pomodoro_sessions
-         WHERE user_id = $1 AND status = 'completed'
-         ORDER BY day DESC`,
-        [userId]
-    );
-    return result.rows.map((row) => row.day);
-}
-
 async function getWeeklySummary(userId, weekStart, weekEnd) {
     const result = await pool.query(
         `SELECT subject, SUM(duration_minutes)::int AS total_minutes
@@ -77,6 +66,5 @@ module.exports = {
     abandonSession,
     getActiveSession,
     getHistory,
-    getCompletedSessionDays,
     getWeeklySummary,
 };

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logoIcon from '../assets/logo-icon.png';
 import { updateProfile } from '../api/authApi';
-import { getStreak } from '../api/pomodoroApi';
 import { getWeakSubjects } from '../api/examsApi';
+import { getStreak, getWeeklySummary } from '../api/statsApi';
 import { getTipOfTheDay } from '../constants/dailyTips';
 
 function FlashcardIcon() {
@@ -58,18 +58,18 @@ function LogoutIcon() {
     );
 }
 
-function FlameIcon() {
-    return (
-        <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.545 3.75 3.75 0 0 1 3.255 3.717Z" />
-        </svg>
-    );
-}
-
 function TrendDownIcon() {
     return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 7l7 7 4-4 5 5M15 15h5v-5" />
+        </svg>
+    );
+}
+
+function FlameIcon() {
+    return (
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1a5.99 5.99 0 0 1 1.925-3.545 3.75 3.75 0 0 1 3.255 3.717Z" />
         </svg>
     );
 }
@@ -174,12 +174,49 @@ function ExamCountdown({ targetExamDate, createdAt, onSave }) {
 }
 
 function StreakBadge({ streak }) {
-    if (streak === null) return null;
+    if (!streak || streak.currentStreak <= 0) return null;
 
     return (
-        <div className="header-streak">
+        <div className="header-streak" title={`En uzun serin: ${streak.longestStreak} gün`}>
             <FlameIcon />
-            <span>{streak > 0 ? `${streak} günlük seri` : 'Seri başlat'}</span>
+            <span>{streak.currentStreak} gün</span>
+        </div>
+    );
+}
+
+function WeeklySummaryCard({ summary }) {
+    if (!summary || summary.totalQuestions === 0) {
+        return (
+            <div className="countdown-card weekly-summary-card">
+                <span className="countdown-label">
+                    Bu hafta henüz soru çözmedin. Çalışma kartları veya deneme ekleyerek başlayabilirsin.
+                </span>
+            </div>
+        );
+    }
+
+    const topSubjects = summary.bySubject.slice(0, 3);
+
+    return (
+        <div className="countdown-card weekly-summary-card">
+            <span className="weekly-summary-headline">
+                Bu hafta: <strong>{summary.totalQuestions} soru</strong> çözdün
+                {summary.accuracyPct !== null && (
+                    <>
+                        , <strong>%{summary.accuracyPct}</strong> başarı
+                    </>
+                )}
+            </span>
+            {topSubjects.length > 0 && (
+                <ul className="weekly-summary-subjects">
+                    {topSubjects.map((row) => (
+                        <li key={row.subject}>
+                            <span>{row.subject}</span>
+                            <span>{row.count}</span>
+                        </li>
+                    ))}
+                </ul>
+            )}
         </div>
     );
 }
@@ -204,17 +241,22 @@ function WeakSubjectNudge({ weakSubject }) {
 function HomePage() {
     const navigate = useNavigate();
     const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('dusasistan_user')));
-    const [streak, setStreak] = useState(null);
     const [weakSubjects, setWeakSubjects] = useState([]);
+    const [streak, setStreak] = useState(null);
+    const [weeklySummary, setWeeklySummary] = useState(null);
 
     useEffect(() => {
-        getStreak()
-            .then((result) => setStreak(result.streak))
-            .catch(() => setStreak(null));
-
         getWeakSubjects()
             .then(setWeakSubjects)
             .catch(() => setWeakSubjects([]));
+
+        getStreak()
+            .then(setStreak)
+            .catch(() => setStreak(null));
+
+        getWeeklySummary()
+            .then(setWeeklySummary)
+            .catch(() => setWeeklySummary(null));
     }, []);
 
     function handleLogout() {
@@ -233,8 +275,11 @@ function HomePage() {
     return (
         <div className="home-page">
             <header className="home-topbar">
-                <img src={logoIcon} className="home-logo" alt="DUS Asistan" />
                 <StreakBadge streak={streak} />
+                <div className="home-brand">
+                    <img src={logoIcon} className="home-logo" alt="DUS Asistan" />
+                    <span className="home-brand-name">DUS Asistan</span>
+                </div>
                 <button className="home-logout" onClick={handleLogout} title="Çıkış Yap" aria-label="Çıkış Yap">
                     <LogoutIcon />
                 </button>
@@ -247,6 +292,7 @@ function HomePage() {
 
             <div className="home-stats-row">
                 <ExamCountdown targetExamDate={user.targetExamDate} createdAt={user.createdAt} onSave={handleSaveExamDate} />
+                <WeeklySummaryCard summary={weeklySummary} />
             </div>
 
             <WeakSubjectNudge weakSubject={weakSubjects[0]} />

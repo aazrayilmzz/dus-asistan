@@ -125,16 +125,53 @@
 }
 
 .home-topbar {
+  position: relative;
   width: 100%;
   max-width: 420px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+}
+
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .home-logo {
   width: 56px;
   height: auto;
+}
+
+.home-brand-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.header-streak {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent-warm-bg);
+  color: var(--text-h);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.header-streak svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-warm);
 }
 
 .home-greeting h1 {
@@ -253,23 +290,41 @@
   background: var(--accent-hover);
 }
 
-.header-streak {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: var(--accent-warm-bg);
-  color: var(--text-h);
-  font-weight: 600;
-  font-size: 13px;
-  white-space: nowrap;
+.weekly-summary-card {
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: left;
 }
 
-.header-streak svg {
-  width: 16px;
-  height: 16px;
-  color: var(--accent-warm);
+.weekly-summary-headline {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.weekly-summary-headline strong {
+  color: var(--accent);
+}
+
+.weekly-summary-subjects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weekly-summary-subjects li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.weekly-summary-subjects li span:last-child {
+  font-weight: 600;
+  color: var(--text-h);
 }
 
 .weak-subject-nudge {
@@ -365,6 +420,10 @@
 }
 
 .home-logout {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -38,7 +38,7 @@ async function create(req, res) {
 }
 
 async function list(req, res) {
-    const { subject, difficulty, needsReview, due } = req.query;
+    const { subject, difficulty, needsReview, due, isAiGenerated } = req.query;
 
     try {
         const cards = await flashcardsService.getUserFlashcards(req.user.userId, {
@@ -46,6 +46,7 @@ async function list(req, res) {
             difficulty,
             needsReview: needsReview === undefined ? undefined : needsReview === 'true',
             due: due === 'true',
+            isAiGenerated: isAiGenerated === undefined ? undefined : isAiGenerated === 'true',
         });
         res.status(200).json({ status: 'success', data: cards });
     } catch (error) {

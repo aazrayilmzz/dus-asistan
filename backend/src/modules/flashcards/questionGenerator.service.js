@@ -7,7 +7,10 @@ function buildSystemPrompt(subject) {
     return `Sen 20 yıldır DUS (Diş Hekimliği Uzmanlık Sınavı) hazırlayan, ${subject} alanında uzman bir öğretim üyesisin.
 
 Kurallar:
-- Soruların zorluk seviyesi son 10 yıl DUS ortalamasına yakın olsun.
+- Her soru için "kolay", "orta" veya "zor" zorluk seviyelerinden birini ata ve mümkün olduğunca üçünü de dengeli dağıt (aynı sayıda değilse bile hepsinden en az bir tane bulunsun):
+  - kolay: temel bilgi/tanım/hatırlama düzeyinde, tek adımlı.
+  - orta: klinik yorum gerektiren, son 10 yıl DUS ortalamasına yakın standart bir soru.
+  - zor: çok adımlı klinik akıl yürütme, ayırıcı tanı veya nadir/karmaşık bir vaka gerektiren soru.
 - Sorular ezber değil klinik yorum ölçsün.
 - Her sorunun tek, net bir doğru cevabı olsun.
 - Cevabın sonuna kısa bir açıklama ve konunun geçtiği kaynak kitap/bölüm bilgisini ekle.
@@ -20,7 +23,7 @@ function buildUserPrompt(subject, count, existingQuestions) {
         ? `Kullanıcının bu branştan zaten sahip olduğu sorular (bunlarla örtüşme):\n${existingQuestions.map((q) => `- ${q}`).join('\n')}`
         : 'Kullanıcının bu branştan henüz kartı yok.';
 
-    return `${subject} branşından ${count} adet çalışma kartı sorusu üret.\n\n${existingList}`;
+    return `${subject} branşından ${count} adet çalışma kartı sorusu üret. Zorluk seviyelerini (kolay/orta/zor) dengeli dağıt.\n\n${existingList}`;
 }
 
 const RESPONSE_SCHEMA = {
@@ -33,8 +36,9 @@ const RESPONSE_SCHEMA = {
                 properties: {
                     question: { type: 'string' },
                     answer: { type: 'string' },
+                    difficulty: { type: 'string', enum: ['kolay', 'orta', 'zor'] },
                 },
-                required: ['question', 'answer'],
+                required: ['question', 'answer', 'difficulty'],
                 additionalProperties: false,
             },
         },
@@ -46,7 +50,7 @@ const RESPONSE_SCHEMA = {
 async function generateQuestions({ subject, count, existingQuestions }) {
     const response = await client.messages.create({
         model: MODEL,
-        max_tokens: 4096,
+        max_tokens: 8192,
         system: buildSystemPrompt(subject),
         output_config: {
             format: { type: 'json_schema', schema: RESPONSE_SCHEMA },
@@ -55,6 +59,12 @@ async function generateQuestions({ subject, count, existingQuestions }) {
             { role: 'user', content: buildUserPrompt(subject, count, existingQuestions) },
         ],
     });
+
+    if (response.stop_reason === 'max_tokens') {
+        const error = new Error('AI yanıtı çok uzun sürdü, lütfen daha az soru ile tekrar deneyin.');
+        error.statusCode = 502;
+        throw error;
+    }
 
     const textBlock = response.content.find((block) => block.type === 'text');
     const parsed = JSON.parse(textBlock.text);

@@ -1,4 +1,5 @@
 const examsRepository = require('./exams.repository');
+const statsService = require('../stats/stats.service');
 
 function calculateNet(correctCount, wrongCount) {
     const net = correctCount - wrongCount / 4;
@@ -20,7 +21,7 @@ async function createExam(userId, { examName, examDate, correctCount, wrongCount
 
     const net = calculateNet(correctCount, wrongCount);
 
-    return examsRepository.create({
+    const created = await examsRepository.create({
         userId,
         examName,
         examDate: examDate || new Date().toISOString().slice(0, 10),
@@ -30,6 +31,10 @@ async function createExam(userId, { examName, examDate, correctCount, wrongCount
         net,
         score,
     });
+
+    await statsService.recordActivity(userId);
+
+    return created;
 }
 
 async function getUserExams(userId) {

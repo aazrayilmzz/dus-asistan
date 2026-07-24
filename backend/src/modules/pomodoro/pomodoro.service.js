@@ -60,39 +60,6 @@ async function getHistory(userId) {
     return pomodoroRepository.getHistory(userId);
 }
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-function toUtcMidnight(dayString) {
-    return new Date(`${dayString}T00:00:00Z`).getTime();
-}
-
-function computeStreak(dayStrings) {
-    if (dayStrings.length === 0) return 0;
-
-    const days = dayStrings.map(toUtcMidnight);
-    const todayString = new Date().toISOString().slice(0, 10);
-    const today = toUtcMidnight(todayString);
-
-    let expected = days[0] === today ? today : today - ONE_DAY_MS;
-    let streak = 0;
-
-    for (const day of days) {
-        if (day === expected) {
-            streak += 1;
-            expected -= ONE_DAY_MS;
-        } else if (day < expected) {
-            break;
-        }
-    }
-
-    return streak;
-}
-
-async function getStreak(userId) {
-    const days = await pomodoroRepository.getCompletedSessionDays(userId);
-    return { streak: computeStreak(days) };
-}
-
 function getMondayOfCurrentWeek() {
     const now = new Date();
     const day = now.getDay();
@@ -118,6 +85,5 @@ module.exports = {
     abandonSession,
     getActiveSession,
     getHistory,
-    getStreak,
     getWeeklySummary,
 };

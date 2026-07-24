@@ -1,5 +1,6 @@
 const flashcardsRepository = require('./flashcards.repository');
 const questionGenerator = require('./questionGenerator.service');
+const statsService = require('../stats/stats.service');
 
 const ALLOWED_DIFFICULTIES = ['kolay', 'orta', 'zor'];
 
@@ -23,8 +24,8 @@ async function createFlashcard(userId, { question, answer, subject, difficulty }
     });
 }
 
-async function getUserFlashcards(userId, { subject, difficulty, needsReview, due } = {}) {
-    return flashcardsRepository.findAllByUserId(userId, { subject, difficulty, needsReview, due });
+async function getUserFlashcards(userId, { subject, difficulty, needsReview, due, isAiGenerated } = {}) {
+    return flashcardsRepository.findAllByUserId(userId, { subject, difficulty, needsReview, due, isAiGenerated });
 }
 
 async function updateFlashcard(userId, cardId, { question, answer, subject, difficulty, needsReview }) {
@@ -85,12 +86,20 @@ async function reviewFlashcard(userId, cardId, rating) {
     assertValidRating(rating);
 
     const nextReviewAt = new Date(Date.now() + REVIEW_INTERVAL_MS[rating]);
-    const updated = await flashcardsRepository.updateNextReview(cardId, userId, nextReviewAt);
+    // "Zor" işaretlenen kart otomatik olarak Hata Kutusu'na eklenir.
+    const needsReview = rating === 'zor' ? true : undefined;
+    const updated = await flashcardsRepository.updateNextReview(cardId, userId, nextReviewAt, needsReview);
     if (!updated) {
         const error = new Error('Kart bulunamadı.');
         error.statusCode = 404;
         throw error;
     }
+
+    await statsService.recordFlashcardReview(userId, {
+        flashcardId: updated.id,
+        subject: updated.subject,
+        rating,
+    });
 
     return updated;
 }
@@ -127,12 +136,13 @@ async function generateFlashcards(userId, { subject, count }) {
 
     const created = [];
     for (const item of generated) {
+        const difficulty = ALLOWED_DIFFICULTIES.includes(item.difficulty) ? item.difficulty : 'orta';
         const card = await flashcardsRepository.create({
             userId,
             question: item.question,
             answer: item.answer,
             subject,
-            difficulty: 'orta',
+            difficulty,
             isAiGenerated: true,
         });
         created.push(card);

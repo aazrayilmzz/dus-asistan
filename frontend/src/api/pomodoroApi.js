@@ -25,11 +25,6 @@ export async function getHistory() {
     return response.data.data;
 }
 
-export async function getStreak() {
-    const response = await axiosClient.get('/pomodoro/streak');
-    return response.data.data;
-}
-
 export async function getWeeklySummary() {
     const response = await axiosClient.get('/pomodoro/weekly-summary');
     return response.data.data;

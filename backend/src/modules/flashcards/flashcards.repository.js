@@ -10,7 +10,7 @@ async function create({ userId, question, answer, subject, difficulty, isAiGener
     return result.rows[0];
 }
 
-async function findAllByUserId(userId, { subject, difficulty, needsReview, due } = {}) {
+async function findAllByUserId(userId, { subject, difficulty, needsReview, due, isAiGenerated } = {}) {
     const conditions = ['user_id = $1'];
     const params = [userId];
 
@@ -33,8 +33,13 @@ async function findAllByUserId(userId, { subject, difficulty, needsReview, due }
         conditions.push(`(next_review_at IS NULL OR next_review_at <= NOW())`);
     }
 
+    if (isAiGenerated !== undefined) {
+        params.push(isAiGenerated);
+        conditions.push(`is_ai_generated = $${params.length}`);
+    }
+
     const result = await pool.query(
-        `SELECT * FROM flashcards WHERE ${conditions.join(' AND ')} ORDER BY created_at DESC`,
+        `SELECT * FROM flashcards WHERE ${conditions.join(' AND ')} ORDER BY subject ASC, created_at DESC`,
         params
     );
     return result.rows;
@@ -79,13 +84,22 @@ async function deleteByIdAndUserId(id, userId) {
     return result.rows[0];
 }
 
-async function updateNextReview(id, userId, nextReviewAt) {
+async function updateNextReview(id, userId, nextReviewAt, needsReview) {
+    const setClauses = ['next_review_at = $1', 'updated_at = NOW()'];
+    const params = [nextReviewAt];
+
+    if (needsReview !== undefined) {
+        params.push(needsReview);
+        setClauses.push(`needs_review = $${params.length}`);
+    }
+
+    params.push(id, userId);
     const result = await pool.query(
         `UPDATE flashcards
-         SET next_review_at = $1, updated_at = NOW()
-         WHERE id = $2 AND user_id = $3
+         SET ${setClauses.join(', ')}
+         WHERE id = $${params.length - 1} AND user_id = $${params.length}
          RETURNING *`,
-        [nextReviewAt, id, userId]
+        params
     );
     return result.rows[0];
 }

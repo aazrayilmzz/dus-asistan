@@ -16,6 +16,13 @@ import AiGenerateForm from '../components/AiGenerateForm';
 import { EXAM_SUBJECTS, DIFFICULTIES } from '../constants/specialties';
 import './FlashcardsPage.css';
 
+function sortCards(list) {
+    return [...list].sort((a, b) => {
+        if (a.subject !== b.subject) return a.subject.localeCompare(b.subject, 'tr');
+        return new Date(b.created_at) - new Date(a.created_at);
+    });
+}
+
 function FlashcardsPage() {
     const [cards, setCards] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -27,9 +34,11 @@ function FlashcardsPage() {
         subject: searchParams.get('subject') || '',
         difficulty: '',
         needsReview: searchParams.get('needsReview') === 'true',
+        isAiGenerated: false,
     });
     const [dueCards, setDueCards] = useState([]);
     const [reviewMode, setReviewMode] = useState(false);
+    const [reviewCards, setReviewCards] = useState([]);
     const [showAiForm, setShowAiForm] = useState(false);
 
     function refreshDueCards() {
@@ -51,6 +60,7 @@ function FlashcardsPage() {
             subject: filters.subject,
             difficulty: filters.difficulty,
             needsReview: filters.needsReview ? true : undefined,
+            isAiGenerated: filters.isAiGenerated ? true : undefined,
         })
             .then((data) => {
                 if (!cancelled) setCards(data);
@@ -86,10 +96,10 @@ function FlashcardsPage() {
         try {
             if (editingCard) {
                 const updated = await updateFlashcard(editingCard.id, formData);
-                setCards((prev) => prev.map((card) => (card.id === updated.id ? updated : card)));
+                setCards((prev) => sortCards(prev.map((card) => (card.id === updated.id ? updated : card))));
             } else {
                 const created = await createFlashcard(formData);
-                setCards((prev) => [created, ...prev]);
+                setCards((prev) => sortCards([created, ...prev]));
             }
             closeForm();
         } catch (err) {
@@ -100,7 +110,7 @@ function FlashcardsPage() {
     async function handleGenerate({ subject, count }) {
         try {
             const created = await generateFlashcards({ subject, count });
-            setCards((prev) => [...created, ...prev]);
+            setCards((prev) => sortCards([...created, ...prev]));
             setShowAiForm(false);
         } catch (err) {
             throw new Error(getErrorMessage(err));
@@ -150,6 +160,11 @@ function FlashcardsPage() {
         }
     }
 
+    function startReview(cardsToReview) {
+        setReviewCards(cardsToReview);
+        setReviewMode(true);
+    }
+
     function handleFinishReview() {
         setReviewMode(false);
         refreshDueCards();
@@ -162,6 +177,11 @@ function FlashcardsPage() {
                 <h1>Çalışma Kartları</h1>
                 {!reviewMode && (
                     <div className="flashcards-header-actions">
+                        {cards.length > 0 && (
+                            <button className="flashcards-ai-btn" onClick={() => startReview(cards)}>
+                                Tek Tek Çalış
+                            </button>
+                        )}
                         <button
                             className="flashcards-ai-btn"
                             onClick={() => {
@@ -189,13 +209,13 @@ function FlashcardsPage() {
             </header>
 
             {reviewMode ? (
-                <FlashcardReviewSession cards={dueCards} onRate={handleRate} onFinish={handleFinishReview} />
+                <FlashcardReviewSession cards={reviewCards} onRate={handleRate} onFinish={handleFinishReview} />
             ) : (
                 <>
                     {dueCards.length > 0 && (
                         <div className="due-review-banner">
                             <span>Bugün tekrar edilecek <strong>{dueCards.length}</strong> kartın var.</span>
-                            <button className="auth-submit" onClick={() => setReviewMode(true)}>
+                            <button className="auth-submit" onClick={() => startReview(dueCards)}>
                                 Tekrarı Başlat
                             </button>
                         </div>
@@ -234,6 +254,16 @@ function FlashcardsPage() {
                             />
                             Sadece Hata Kutusu ★
                         </label>
+                        <label className="flashcards-review-filter">
+                            <input
+                                type="checkbox"
+                                checked={filters.isAiGenerated}
+                                onChange={(event) =>
+                                    setFilters((prev) => ({ ...prev, isAiGenerated: event.target.checked }))
+                                }
+                            />
+                            Sadece AI Üretimi
+                        </label>
                     </div>
 
                     {error && <div className="auth-error">{error}</div>}
@@ -244,6 +274,8 @@ function FlashcardsPage() {
                         <p className="flashcards-status">
                             {filters.needsReview
                                 ? 'Hata kutusu boş. Zorlandığın kartları yıldızlayarak buraya ekleyebilirsin.'
+                                : filters.isAiGenerated
+                                ? 'AI ile üretilmiş kart yok. "AI ile Soru Üret" ile oluşturabilirsin.'
                                 : 'Henüz kart yok. Yukarıdan ilk kartını ekle!'}
                         </p>
                     ) : (

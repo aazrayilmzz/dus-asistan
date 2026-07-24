@@ -72,15 +72,6 @@ async function history(req, res) {
     }
 }
 
-async function streak(req, res) {
-    try {
-        const result = await pomodoroService.getStreak(req.user.userId);
-        res.status(200).json({ status: 'success', data: result });
-    } catch (error) {
-        sendError(res, error);
-    }
-}
-
 async function weeklySummary(req, res) {
     try {
         const result = await pomodoroService.getWeeklySummary(req.user.userId);
@@ -96,6 +87,5 @@ module.exports = {
     abandon,
     active,
     history,
-    streak,
     weeklySummary,
 };

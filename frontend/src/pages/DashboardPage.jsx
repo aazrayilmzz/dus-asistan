@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { listExams, getSubjectSummary } from '../api/examsApi';
+import { getWeeklySummary } from '../api/statsApi';
 import getErrorMessage from '../api/getErrorMessage';
 import ExamProgressChart from '../components/ExamProgressChart';
 import SubjectDistributionChart from '../components/SubjectDistributionChart';
+import WeeklySubjectChart from '../components/WeeklySubjectChart';
 import './ExamsPage.css';
 import './DashboardPage.css';
 
 function DashboardPage() {
     const [exams, setExams] = useState([]);
     const [subjectSummary, setSubjectSummary] = useState([]);
+    const [weeklySummary, setWeeklySummary] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
@@ -18,11 +21,12 @@ function DashboardPage() {
 
         setLoading(true);
         setError('');
-        Promise.all([listExams(), getSubjectSummary()])
-            .then(([examsData, summaryData]) => {
+        Promise.all([listExams(), getSubjectSummary(), getWeeklySummary()])
+            .then(([examsData, summaryData, weeklyData]) => {
                 if (cancelled) return;
                 setExams(examsData);
                 setSubjectSummary(summaryData);
+                setWeeklySummary(weeklyData);
             })
             .catch((err) => {
                 if (!cancelled) setError(getErrorMessage(err));
@@ -66,6 +70,15 @@ function DashboardPage() {
                         <p className="dashboard-status">
                             Henüz branş bazında sonuç girilmemiş. Yeni deneme eklerken branş sonuçlarını da girerek bu
                             grafiği doldurabilirsin.
+                        </p>
+                    )}
+
+                    {weeklySummary && weeklySummary.bySubject.length > 0 ? (
+                        <WeeklySubjectChart bySubject={weeklySummary.bySubject} />
+                    ) : (
+                        <p className="dashboard-status">
+                            Bu hafta henüz soru çözmedin. Çalışma kartları veya deneme ekleyerek bu grafiği
+                            doldurabilirsin.
                         </p>
                     )}
                 </>
